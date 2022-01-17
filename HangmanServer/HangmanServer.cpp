@@ -1,16 +1,4 @@
 ﻿#include "HangmanServer.h"
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <error.h>
-#include <thread>
-#include <string>
 
 using namespace std;
 
