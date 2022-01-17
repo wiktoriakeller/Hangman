@@ -16,3 +16,9 @@
 #include <error.h>
 #include <thread>
 #include <string>
+#include <sys/epoll.h>
+#include <signal.h>
+
+
+const int SERVER_PORT = 12345;
+const int one = 1;
