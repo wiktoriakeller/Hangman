@@ -1,0 +1,31 @@
+﻿<Window x:Class="HangmanClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" xmlns:view="clr-namespace:HangmanClient.MVVM.View"
+        mc:Ignorable="d"
+        FontSize="14"
+        Title="Hangman" Height="720" Width="1280">
+
+
+    <Grid Margin="20 10" MaxWidth="1280">
+        <Grid.Resources>
+            <DataTemplate DataType="{x:Type viewmodel:JoinRoomViewModel}">
+                <view:JoinRoomView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodel:CreateRoomViewModel}">
+                <view:CreateRoomView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodel:MainMenuViewModel}">
+                <view:MainMenuView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodel:GameViewModel}">
+                <view:GameView/>
+            </DataTemplate>
+        </Grid.Resources>
+
+        <ContentControl Content="{Binding CurrentViewModel}" Margin="10 25"/>
+
+    </Grid>
+</Window>
