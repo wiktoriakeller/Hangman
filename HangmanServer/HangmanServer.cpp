@@ -62,7 +62,7 @@ public:
 		close(_socket);
 	}
 	
-	void Handle(uint events) override { //TODO: implement writing - EPOLLOUT
+	void Handle(uint events) override {
 		if (events & EPOLLIN) {
             char buffer[BUFFER_SIZE];
 			memset(buffer, 0x00, BUFFER_SIZE);
@@ -79,7 +79,7 @@ public:
 				for (int i = 0; i < currentMessagesToRead.size(); i++) {
 					if (currentMessagesToRead[i] == '\n') {
 						tmpMessage += currentMessagesToRead[i];
-						parseMessage(tmpMessage);
+						ParseMessage(tmpMessage);
 						tmpMessage.clear();
 					}
 					else {
@@ -95,7 +95,37 @@ public:
 			}
 		}
 
-		if (events & ~EPOLLIN) {
+		if (events & EPOLLOUT) {
+			bool dataToSend = currentMessagesToSend.size() > 0 ? true : false;
+			while (dataToSend) {
+				int i = currentMessagesToSend.size() - 1;
+				const char* data = currentMessagesToSend[i].c_str();
+				size_t size = currentMessagesToSend[i].size();
+				int sent = send(_socket, data, size, MSG_DONTWAIT);
+
+				if (sent == -1) {
+					if (errno != EWOULDBLOCK && errno != EAGAIN) {
+						events |= EPOLLERR;
+					}
+
+					break;
+				}
+				else if(sent != size) {
+					currentMessagesToSend[i] = currentMessagesToSend[i].substr(sent);
+				}
+				else {
+					currentMessagesToSend.pop_back();
+				}
+
+				if (currentMessagesToSend.size() == 0)
+					dataToSend = false;
+			}
+
+			if (currentMessagesToSend.size() == 0)
+				WaitForWrite(false);
+		}
+
+		if (events & ~(EPOLLIN | EPOLLOUT)) {
 			delete this;
 		}
 	}
@@ -104,20 +134,44 @@ private:
 	const size_t BUFFER_SIZE = 8;
 	int _socket;
 	std::vector<char> currentMessagesToRead;
-	std::vector<char> currentMessagesToSend;
+	std::vector<string> currentMessagesToSend;
 
-	void handleOperation(std::vector<string>& splitted) {
+	void WaitForWrite(bool epollout) {
+		epoll_event ee{ { EPOLLIN | (epollout ? EPOLLOUT : 0) | EPOLLRDHUP }, {.ptr = this} };
+		epoll_ctl(epollFd, EPOLL_CTL_MOD, _socket, &ee);
+	}
+
+	void PrepereToSend(std::vector<string>& messageParts) {
+		string fullMessage;
+
+		for (int i = 0; i < messageParts.size(); i++) {
+			fullMessage += messageParts[i];
+			fullMessage += " ";
+		}
+
+		fullMessage += "\n";
+
+		WaitForWrite(true);
+		currentMessagesToSend.emplace_back(fullMessage);
+	}
+
+	void HandleOperation(std::vector<string>& splitted) {
 		OperationCodes operationType = (OperationCodes)stoi(splitted[0]);
+		std::vector<string> toSend;
+
 		switch (operationType)
 		{
 		case OperationCodes::SendNewRoomId:
-			send(_socket, splitted[0].c_str(), splitted[0].size(), 0);
+			toSend.emplace_back("message sent!");
 		default:
 			break;
 		}
+
+		if(toSend.size() != 0) 
+			PrepereToSend(toSend);
 	}
 
-	void parseMessage(string message) {
+	void ParseMessage(string message) {
 		std::vector<string> splitted;
 		string messagePart;
 
@@ -134,7 +188,7 @@ private:
 			}
 		}
 
-		handleOperation(splitted);
+		HandleOperation(splitted);
 	}
 };
 
