@@ -18,7 +18,8 @@
 #include <string>
 #include <sys/epoll.h>
 #include <signal.h>
-
+#include <map>
+#include <vector>
 
 const int SERVER_PORT = 12345;
 const int one = 1;

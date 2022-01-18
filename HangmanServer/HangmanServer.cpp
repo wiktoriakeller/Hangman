@@ -6,39 +6,139 @@ int epollFd;
 int serverSocket;
 void ctrl_c(int);
 
+class Room {
+
+};
+
+class Game {
+public:
+	static Game& Instance() {
+		static Game instance;
+		return instance;
+	}
+
+	int GetFreeRoomId() {
+		for (int i = LOWER_BOUND; i <= UPPER_BOUND; i++) {
+			if (!(roomMap.find(i) == roomMap.end())) {
+				return i;
+			}
+		}
+	}
+
+private:
+	const int LOWER_BOUND = 0;
+	const int UPPER_BOUND = 5000;
+
+	std::map<int, std::shared_ptr<Room>> roomMap;
+	
+	Game() {};
+	Game(const Game&) = delete;
+	Game(Game&&) = delete;
+	void operator=(const Game&) = delete;
+	void operator=(const Game&&) = delete;
+};
+
+enum OperationCodes {
+	SendNewRoomId
+};
+
 class Handler {
 public:
 	virtual ~Handler() {};
-	virtual void handle(uint events) = 0;
+	virtual void Handle(uint events) = 0;
 };
 
-class ClientHandler : Handler {
-private:
-	int _socket;
+class Player : public Handler {
 public:
-	ClientHandler(int socket) {
+	Player(int socket) {
 		_socket = socket;
 		epoll_event ee{ EPOLLIN | EPOLLRDHUP, {.ptr = this} };
 		epoll_ctl(epollFd, EPOLL_CTL_ADD, _socket, &ee);
 	}
-	~ClientHandler() {
+
+	~Player() {
 		epoll_ctl(epollFd, EPOLL_CTL_DEL, _socket, nullptr);
 		shutdown(_socket, SHUT_RDWR);
 		close(_socket);
 	}
-	void handle(uint events) override {
+	
+	void Handle(uint events) override { //TODO: implement writing - EPOLLOUT
 		if (events & EPOLLIN) {
-            printf("Hangle client\n");
-            char buffer[64];
-            ssize_t count = read(_socket, buffer, 64);
+            char buffer[BUFFER_SIZE];
+			memset(buffer, 0x00, BUFFER_SIZE);
+            ssize_t count = read(_socket, buffer, BUFFER_SIZE - 1);
+			buffer[count] = '\0';
+			
+			if (count <= 0) {
+				events |= EPOLLERR;
+			}
+			else {
+				currentMessagesToRead.insert(currentMessagesToRead.end(), buffer, buffer + count);
+				string tmpMessage;
+
+				for (int i = 0; i < currentMessagesToRead.size(); i++) {
+					if (currentMessagesToRead[i] == '\n') {
+						tmpMessage += currentMessagesToRead[i];
+						parseMessage(tmpMessage);
+						tmpMessage.clear();
+					}
+					else {
+						tmpMessage += currentMessagesToRead[i];
+					}
+				}
+
+				currentMessagesToRead.clear();
+
+				if (tmpMessage.size() != 0) {
+					currentMessagesToRead.assign(tmpMessage.begin(), tmpMessage.end());
+				}
+			}
 		}
+
 		if (events & ~EPOLLIN) {
 			delete this;
 		}
 	}
+
+private:
+	const size_t BUFFER_SIZE = 8;
+	int _socket;
+	std::vector<char> currentMessagesToRead;
+	std::vector<char> currentMessagesToSend;
+
+	void handleOperation(std::vector<string>& splitted) {
+		OperationCodes operationType = (OperationCodes)stoi(splitted[0]);
+		switch (operationType)
+		{
+		case OperationCodes::SendNewRoomId:
+			send(_socket, splitted[0].c_str(), splitted[0].size(), 0);
+		default:
+			break;
+		}
+	}
+
+	void parseMessage(string message) {
+		std::vector<string> splitted;
+		string messagePart;
+
+		for (int i = 0; i < message.size(); i++) {
+			if (message[i] == '\n' && messagePart.size() != 0) {
+				splitted.emplace_back(messagePart);
+			}
+			else if (message[i] == ' ') {
+				splitted.emplace_back(messagePart);
+				messagePart.clear();
+			}
+			else {
+				messagePart += message[i];
+			}
+		}
+
+		handleOperation(splitted);
+	}
 };
 
-class ServerHandler : Handler {
+class ServerHandler : public Handler {
 public:
 	ServerHandler() {
 		sockaddr_in serverAddr{};
@@ -65,21 +165,19 @@ public:
 		close(serverSocket);
 	}
 
-	void handle(uint events) override {
+	void Handle(uint events) override {
 		if (events & EPOLLIN) {
 			sockaddr_in clientAddr{};
 			socklen_t clientAddrSize;
 			clientAddrSize = sizeof(clientAddr);
 			int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
 
-			ClientHandler* client = new ClientHandler(clientSocket);
+			Player* player = new Player(clientSocket);
 		}
 	}
 };
 
-
 int main() {	
-	
 	ServerHandler* serverHandler = new ServerHandler();
 
 	epollFd = epoll_create1(0);
@@ -93,7 +191,8 @@ int main() {
 			error(1, errno, "Epoll failed");
 			ctrl_c(SIGINT);
 		}
-		((Handler*)epollEvent.data.ptr)->handle(epollEvent.events);
+
+		((Handler*)epollEvent.data.ptr)->Handle(epollEvent.events);
 	}
 }
 
