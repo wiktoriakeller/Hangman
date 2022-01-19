@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -20,7 +21,7 @@ namespace HangmanClient.Network
 
     public class Server
     {
-        readonly TcpClient _tcpClient;
+        private readonly TcpClient _tcpClient;
         public int RoomId { get; set; }
 
         public Server()
@@ -35,6 +36,7 @@ namespace HangmanClient.Network
                 try
                 {
                     _tcpClient.Connect(hostName, port);
+                    ReadMessages();
                 }
                 catch (Exception)
                 {
@@ -43,11 +45,25 @@ namespace HangmanClient.Network
             }
         }
 
+        private void ReadMessages()
+        {
+            Task.Run(async () =>
+            {
+                PacketReader packetReader = new PacketReader(_tcpClient.GetStream());
+                while (true)
+                {
+                    var message = await packetReader.GetMessageAsync();
+                    Debug.WriteLine(message);
+                }
+            });
+        }
+
         public bool JoinRoom(int roomId, Player player)
         {
             var packet = PacketWriter.GetPacket((byte)OperationCodes.JoinRoomRequest,
                                                 roomId.ToString());
             _tcpClient.Client.Send(packet);
+
             return true;    //TODO add check if the player was added to the room
         }
 
@@ -58,7 +74,6 @@ namespace HangmanClient.Network
             _tcpClient.Client.Send(packet);
             return true;    //TODO add check if the player was added to the room
         }
-
 
         public ObservableCollection<Player> GetConnectedPlayers()
         {
