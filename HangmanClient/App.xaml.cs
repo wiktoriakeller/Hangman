@@ -23,7 +23,7 @@ namespace HangmanClient
         {
             _navigationStore = new NavigationStore();
             _server = new Server();
-            //_server.Connect("localhost", 12345);
+            _server.Connect("localhost", 12345);
         }
 
         protected override void OnStartup(StartupEventArgs e)

@@ -147,7 +147,7 @@ void Player::PrepereToSend(std::vector<std::string>& messageParts) {
 }
 
 void Player::HandleOperation(std::vector<std::string>& splitted) {
-	OperationCodes operationType = (OperationCodes)stoi(splitted[0]);
+	OperationCodes operationType = (OperationCodes)splitted[0][0];
 	std::vector<std::string> toSend;
 
 	switch (operationType)
