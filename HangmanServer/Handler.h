@@ -17,12 +17,18 @@
 #include <map>
 #include <vector>
 
-class Handler {
-public:
-	virtual ~Handler() {};
-	virtual void Handle(uint events) = 0;
-};
-
 enum OperationCodes {
 	SendNewRoomId
+};
+
+enum HandleResult {
+	None,
+	DeletePlayer,
+	DeleteServer
+};
+
+class Handler {
+public:
+	virtual void Close() = 0;
+	virtual HandleResult Handle(uint events) = 0;
 };

@@ -1,19 +1,56 @@
 #include "Player.h"
 #include "Game.h"
 
-Player::Player(int socket) {
+Player::Player(int socket, int id, int epollFd) {
 	_socket = socket;
+	_id = id;
+	_roomId = -1;
+	_epollFd = epollFd;
 	epoll_event ee{ EPOLLIN | EPOLLRDHUP, {.ptr = this} };
-	epoll_ctl(Game::Instance().GetEpollFd(), EPOLL_CTL_ADD, _socket, &ee);
+	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _socket, &ee);
 }
 
-Player::~Player() {
-	epoll_ctl(Game::Instance().GetEpollFd(), EPOLL_CTL_DEL, _socket, nullptr);
+void Player::Close() {
+	CloseSocket();
+	Game::Instance().DeletePlayer(_id);
+	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
+	if(room != nullptr)
+		room->DeletePlayer(_name);
+	printf("Player closed\n");
+}
+
+void Player::CloseSocket() {
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, _socket, nullptr);
 	shutdown(_socket, SHUT_RDWR);
 	close(_socket);
+	printf("Player socket closed\n");
 }
 
-void Player::Handle(uint events) {
+void Player::SetId(int id) {
+	_id = id;
+}
+
+int Player::GetId() {
+	return _id;
+}
+
+void Player::SetName(std::string name) {
+	_name = name;
+}
+
+std::string Player::GetName() {
+	return _name;
+}
+
+void Player::SetRoomId(int id) {
+	_roomId = id;
+}
+
+int Player::GetRoomId() {
+	return _roomId;
+}
+
+HandleResult Player::Handle(uint events) {
 	if (events & EPOLLIN) {
 		char buffer[BUFFER_SIZE];
 		memset(buffer, 0x00, BUFFER_SIZE);
@@ -77,18 +114,21 @@ void Player::Handle(uint events) {
 	}
 
 	if (events & ~(EPOLLIN | EPOLLOUT)) {
-		delete this;
+		Close();
+		return HandleResult::DeletePlayer;
 	}
+
+	return HandleResult::None;
 }
 
 void Player::WaitForWrite(bool epollout) {
 	if (epollout) {
 		epoll_event ee{ { EPOLLIN | EPOLLOUT | EPOLLRDHUP }, {.ptr = this } };
-		epoll_ctl(Game::Instance().GetEpollFd(), EPOLL_CTL_MOD, _socket, &ee);
+		epoll_ctl(_epollFd, EPOLL_CTL_MOD, _socket, &ee);
 	}
 	else {
 		epoll_event ee{ { EPOLLIN | EPOLLRDHUP }, {.ptr = this} };
-		epoll_ctl(Game::Instance().GetEpollFd(), EPOLL_CTL_MOD, _socket, &ee);
+		epoll_ctl(_epollFd, EPOLL_CTL_MOD, _socket, &ee);
 	}
 }
 
@@ -113,7 +153,7 @@ void Player::HandleOperation(std::vector<std::string>& splitted) {
 	switch (operationType)
 	{
 	case OperationCodes::SendNewRoomId:
-		toSend.emplace_back("message sent!");
+		toSend.emplace_back("message sent!\0");
 	default:
 		break;
 	}

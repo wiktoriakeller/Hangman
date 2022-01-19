@@ -20,22 +20,38 @@ ServerHandler::ServerHandler() {
 
 	if (listen(_serverSocket, 3))
 		error(1, errno, "Listen failed");
-	
-	Game::Instance().SetServerSocket(_serverSocket);
 }
 
-ServerHandler::~ServerHandler() {
+void ServerHandler::Close() {
 	shutdown(_serverSocket, SHUT_RDWR);
 	close(_serverSocket);
+	printf("Server closed\n");
 }
 
-void ServerHandler::Handle(uint events) {
+HandleResult ServerHandler::Handle(uint events) {
 	if (events & EPOLLIN) {
 		sockaddr_in clientAddr{};
 		socklen_t clientAddrSize;
 		clientAddrSize = sizeof(clientAddr);
 		int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
 
-		Player* player = new Player(clientSocket);
+		int playerId = Game::Instance().GetFreePlayerId();
+		std::shared_ptr<Player> player = std::make_shared<Player>(clientSocket, playerId, _epollFd);
+		Game::Instance().AddPlayer(player, playerId);
+		printf("Added new player\n");
 	}
+
+	if (events & ~EPOLLIN) {
+		return HandleResult::DeleteServer;
+	}
+
+	return HandleResult::None;
+}
+
+void ServerHandler::SetEpollFd(int epollFd) {
+	_epollFd = epollFd;
+}
+
+int ServerHandler::GetServerSocket() {
+	return _serverSocket;
 }
