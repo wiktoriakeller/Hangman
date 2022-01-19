@@ -1,8 +1,4 @@
-﻿// HangmanServer.h : Include file for standard system include files,
-// or project specific include files.
-
 #pragma once
-
 #include <iostream>
 #include <stdio.h>
 #include <sys/types.h>
@@ -21,5 +17,12 @@
 #include <map>
 #include <vector>
 
-const int SERVER_PORT = 12345;
-const int one = 1;
+class Handler {
+public:
+	virtual ~Handler() {};
+	virtual void Handle(uint events) = 0;
+};
+
+enum OperationCodes {
+	SendNewRoomId
+};
