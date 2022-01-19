@@ -18,7 +18,18 @@
 #include <vector>
 
 enum OperationCodes {
-	SendNewRoomId
+	SendNewRoomId = 1,
+	JoinRoom,
+	NotUniqueName,
+	InvalidRoom,
+	GameAlreadyStarted,
+	SendPlayerName,
+	SendAllPlayerNames,
+	RoomIsFull,
+	IncorrectLetter,
+	CorrectLetter,
+	GameEnd,
+	PlayerLeft
 };
 
 enum HandleResult {

@@ -60,9 +60,7 @@ void Game::DeleteAllPlayers() {
 		it->second->CloseSocket();
 
 	_playersMap.clear();
-
-	for (auto it = _roomsMap.begin(); it != _roomsMap.end(); it++)
-		it->second->DeleteAllPlayersInRoom();
+	_roomsMap.clear();
 
 	printf("All players deleted\n");
 }
@@ -74,4 +72,13 @@ void Game::SetServer(std::shared_ptr<Handler> server) {
 void Game::EndGame() {
 	DeleteAllPlayers();
 	_server->Close();
+}
+
+bool Game::DoesRoomExist(int id) {
+	for (auto it = _roomsMap.begin(); it != _roomsMap.end(); it++) {
+		if (it->first == id)
+			return true;
+	}
+
+	return false;
 }

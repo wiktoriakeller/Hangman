@@ -21,6 +21,7 @@ public:
 	void DeleteAllPlayers();
 	void SetServer(std::shared_ptr<Handler> server);
 	void EndGame();
+	bool DoesRoomExist(int id);
 
 private:
 	const int LOWER_BOUND_ROOM = 0;

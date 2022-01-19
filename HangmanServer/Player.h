@@ -14,9 +14,10 @@ public:
 	void SetRoomId(int id);
 	int GetRoomId();
 	void CloseSocket();
+	void PrepereToSend(std::string message);
 
 private:
-	const size_t BUFFER_SIZE = 8;
+	const size_t BUFFER_SIZE = 24;
 	int _socket;
 	int _id;
 	int _roomId;
@@ -26,7 +27,12 @@ private:
 	std::vector<std::string> currentMessagesToSend;
 
 	void WaitForWrite(bool epollout);
-	void PrepereToSend(std::vector<std::string>& messageParts);
 	void HandleOperation(std::vector<std::string>& splitted);
 	void ParseMessage(std::string message);	
+
+	//operation codes handlers
+	std::string SendNewRoomId(std::vector<std::string>& splitted);
+	std::string JoinRoom(std::vector<std::string>& splitted);
+	std::string SendPlayerName(std::vector<std::string>& splitted);
+	std::string SendAllPlayerNames(std::vector<std::string>& splitted);
 };
