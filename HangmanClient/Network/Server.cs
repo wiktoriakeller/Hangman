@@ -9,6 +9,15 @@ using System.Threading.Tasks;
 
 namespace HangmanClient.Network
 {
+    public enum OperationCodes : byte
+    {
+        JoinRoomRequest = 0,
+        JoinRoomResponse = 1,
+        CreateRoomRequest = 2,
+        CreateRoomResponse = 3,
+
+    }
+
     public class Server
     {
         readonly TcpClient _tcpClient;
@@ -36,14 +45,18 @@ namespace HangmanClient.Network
 
         public bool JoinRoom(int roomId, Player player)
         {
-            System.Windows.MessageBox.Show("Joining room " + roomId.ToString());
-            return true;
+            var packet = PacketWriter.GetPacket((byte)OperationCodes.JoinRoomRequest,
+                                                roomId.ToString());
+            _tcpClient.Client.Send(packet);
+            return true;    //TODO add check if the player was added to the room
         }
 
-        public bool CreateRoom(string player)
+        public bool CreateRoom(string username)
         {
-            System.Windows.MessageBox.Show("Creating a room");
-            return true;
+            var packet = PacketWriter.GetPacket((byte)OperationCodes.CreateRoomRequest,
+                                                username);
+            _tcpClient.Client.Send(packet);
+            return true;    //TODO add check if the player was added to the room
         }
 
 

@@ -7,29 +7,15 @@ using System.Threading.Tasks;
 
 namespace HangmanClient.Network
 {
-    public class PacketWriter
+    public static class PacketWriter
     {
-        MemoryStream _memoryStream;
-        public PacketWriter()
+        public static byte[] GetPacket(byte code, string message)
         {
-            _memoryStream = new MemoryStream();
-        }
-
-        public void WriteCode(byte code)
-        {
-            _memoryStream.WriteByte(code);
-        }
-
-        public void WriteString(string text)
-        {
-            var len = text.Length;
-            _memoryStream.Write(BitConverter.GetBytes(len));
-            _memoryStream.Write(Encoding.ASCII.GetBytes(text));
-        }
-
-        public byte[] GetBytes()
-        {
-            return _memoryStream.ToArray();
+            MemoryStream memoryStream = new MemoryStream();
+            memoryStream.WriteByte(code);
+            memoryStream.WriteByte((byte)' ');
+            memoryStream.Write(Encoding.ASCII.GetBytes(message + "\n"));
+            return memoryStream.ToArray();
         }
     }
 }
