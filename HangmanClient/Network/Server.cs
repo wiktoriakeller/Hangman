@@ -1,4 +1,5 @@
 ﻿using HangmanClient.MVVM.Model;
+using HangmanClient.Stores;
 using System;
 using System.Collections.ObjectModel;
 using System.Net.Sockets;
@@ -16,16 +17,27 @@ namespace HangmanClient.Network
 
     public class Server
     {
-        public int RoomId { get; set; }
         private readonly TcpClient _tcpClient;
         private readonly EventWaitHandle _waitHandle = new AutoResetEvent(false);
-
+        private Game _game;
+        private bool _operationFailed;
         public string ErrorMessage { get; private set; }
+
 
         public Server()
         {
-            RoomId = -1;
+            _game = Game.GetInstance();
             _tcpClient = new TcpClient();
+        }
+
+        private bool WaitForResponse()
+        {
+            _operationFailed = false;
+            bool timeout = _waitHandle.WaitOne();
+            _waitHandle.Reset();
+            if (timeout && !_operationFailed)
+                return true;
+            return false;
         }
 
         public void Connect(string hostName, int port)
@@ -49,12 +61,7 @@ namespace HangmanClient.Network
             var packet = PacketWriter.GetPacket((byte)OperationCodes.JoinRoom,
                                                 roomId.ToString() + " " + username);
             _tcpClient.Client.Send(packet);
-
-            bool timeout = _waitHandle.WaitOne();
-            _waitHandle.Reset();
-            if (timeout && RoomId >= 0)
-                return true;
-            return false;
+            return WaitForResponse();
         }
 
         public bool CreateRoom(string username)
@@ -62,12 +69,7 @@ namespace HangmanClient.Network
             var packet = PacketWriter.GetPacket((byte)OperationCodes.CreateRoom,
                                                 username);
             _tcpClient.Client.Send(packet);
-
-            bool timeout = _waitHandle.WaitOne();
-            _waitHandle.Reset();
-            if (timeout && RoomId >= 0)
-                return true;
-            return false;
+            return WaitForResponse();
         }
 
         public ObservableCollection<Player> GetConnectedPlayers()
@@ -110,6 +112,7 @@ namespace HangmanClient.Network
 
         private void HandleRoomFull()
         {
+            _operationFailed = true;
             ErrorMessage = "This room is full!";
             _waitHandle.Set();
         }
@@ -118,10 +121,7 @@ namespace HangmanClient.Network
         {
             var splited = message.Split(" ");
             var roomId = int.Parse(splited[1]);
-            if (roomId >= 0)
-            {
-                RoomId = roomId;
-            }
+            _game.RoomId = roomId;
             _waitHandle.Set();
         }
     }
