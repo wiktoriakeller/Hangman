@@ -11,12 +11,10 @@ namespace HangmanClient.Network
 {
     public class PacketReader : BinaryReader
     {
-        private NetworkStream _networkStream;
         private StreamReader streamReader;
         public PacketReader(NetworkStream input) : base(input)
         {
-            _networkStream = input;
-            streamReader = new StreamReader(_networkStream);
+            streamReader = new StreamReader(input);
         }
 
         public async Task<string> GetMessageAsync()
