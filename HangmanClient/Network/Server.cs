@@ -112,17 +112,18 @@ namespace HangmanClient.Network
                 while (true)
                 {
                     var message = await packetReader.GetMessageAsync();
+                    var split = message.Split(' ');
                     var code = (OperationCodes)message[0];
                         switch (code)
                     {
                         case OperationCodes.SendNewRoomId:
-                            HandleCreateResponse(message);
+                            HandleCreateResponse(split);
                             break;
                         case OperationCodes.JoinRoom:
-                            HandleJoinResponse(message);
+                            HandleJoinResponse(split);
                             break;
                         case OperationCodes.SendPlayerName:
-                            HandleNewPlayer(message);
+                            HandleNewPlayer(split);
                             break;
                         case OperationCodes.RoomIsFull:
                             HandleRoomFull();
@@ -131,13 +132,13 @@ namespace HangmanClient.Network
                             HandleNotUniqueName();
                             break;
                         case OperationCodes.SendWord:
-                            HandleNewWord(message);
+                            HandleNewWord(split);
                             break;
                         case OperationCodes.IncorrectLetter:
                             HandleIncorrectLetter();
                             break;
                         case OperationCodes.CorrectLetter:
-                            HandleCorrectLetter();
+                            HandleCorrectLetter(split);
                             break;
                         default:
                             break;
@@ -146,7 +147,7 @@ namespace HangmanClient.Network
             });
         }
 
-        private void HandleCorrectLetter()
+        private void HandleCorrectLetter(string[] split)
         {
             throw new NotImplementedException();
         }
@@ -156,9 +157,9 @@ namespace HangmanClient.Network
             throw new NotImplementedException();
         }
 
-        private void HandleNewWord(string message)
+        private void HandleNewWord(string[] split)
         {
-            throw new NotImplementedException();
+            _game.SecretWord = split[1];
         }
 
         private void HandleNotUniqueName()
@@ -168,16 +169,14 @@ namespace HangmanClient.Network
             _waitHandle.Set();
         }
 
-        private void HandleNewPlayer(string message)
+        private void HandleNewPlayer(string[] split)
         {
-            var split = message.Split(' ');
             Player player = new Player(split[1], 0);
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.Players.Add(player)));
         }
 
-        private void HandleJoinResponse(string message)
+        private void HandleJoinResponse(string[] split)
         {
-            var split = message.Split(' ');
             for (int i = 1; i < split.Length; i++)
             {
                 if (split[i] != "")
@@ -196,9 +195,8 @@ namespace HangmanClient.Network
             _waitHandle.Set();
         }
 
-        private void HandleCreateResponse(string message)
+        private void HandleCreateResponse(string[] split)
         {
-            var split = message.Split(' ');
             var roomId = int.Parse(split[1]);
             _game.RoomId = roomId;
             _waitHandle.Set();
