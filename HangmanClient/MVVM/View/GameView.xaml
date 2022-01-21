@@ -5,15 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HangmanClient.MVVM.View" xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:GameViewModel}"
              mc:Ignorable="d" 
-             d:DesignHeight="720" d:DesignWidth="1280">
+             d:DesignHeight="520" d:DesignWidth="900"
+             FontSize="20">
     <Grid>
-        <Grid.RowDefinitions>
+        <Grid.RowDefinitions> 
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         
         <TextBlock Text="Game View" FontSize="50" Grid.Row="0"/>
-        <local:PlayerGallery Grid.Row="1"/>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <TextBlock Text="Select a letter: "/>
+            <TextBox MinWidth="20" 
+                     HorizontalContentAlignment="Center"
+                     Margin="15 0"
+                     Text="{Binding PlayerInput, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="Submit" Command="{Binding SubmitLetter}"/>
+        </StackPanel>
+        
+        <local:PlayerGallery Grid.Row="2"/>
     </Grid>
 </UserControl>

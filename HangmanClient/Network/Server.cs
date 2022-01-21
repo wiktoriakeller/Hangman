@@ -12,18 +12,22 @@ namespace HangmanClient.Network
 {
     public enum OperationCodes : byte
     {
-        CreateRoom = 1,
-        JoinRoom,
-        NotUniqueName,
-        InvalidRoom,
-        GameAlreadyStarted,
-        SendPlayerName,
-        SendAllPlayerNames,
-        RoomIsFull,
-        IncorrectLetter,
-        CorrectLetter,
-        GameEnd,
-        PlayerLeft
+        SendNewRoomId = 1,
+        JoinRoom = 2,
+        NotUniqueName = 3,
+        InvalidRoom = 4,
+        GameAlreadyStarted = 5,
+        SendPlayerName = 6,
+        SendAllPlayerNames = 7,
+        RoomIsFull = 8,
+        SendWord = 9,
+        CheckLetter = 11,
+        IncorrectLetter = 12,
+        CorrectLetter = 13,
+        SendHangmanWithName = 14,
+        PlayerLeft = 15,
+        EndGame = 16
+
     }
 
     public class Server
@@ -75,7 +79,7 @@ namespace HangmanClient.Network
             if (WaitForResponse())
             {
                 _game.Players.Add(new Player(username, 0));
-                //_game.mainPlayer.Username = username;
+                _game.RoomId = roomId;
                 return true;
             }
             return false;
@@ -83,16 +87,21 @@ namespace HangmanClient.Network
 
         public bool CreateRoom(string username)
         {
-            var packet = PacketWriter.GetPacket((byte)OperationCodes.CreateRoom,
+            var packet = PacketWriter.GetPacket((byte)OperationCodes.SendNewRoomId,
                                                 username);
             _tcpClient.Client.Send(packet);
             if (WaitForResponse())
             {
-                //_game.mainPlayer.Username = username;
                 _game.Players.Add(new Player(username, 0));
                 return true;
             }
             return false;
+        }
+
+        public void SubmitLetter(string letter)
+        {
+            var packet = PacketWriter.GetPacket((byte)OperationCodes.CheckLetter, letter);
+            _tcpClient.Client.Send(packet);
         }
 
         private void ReadMessages()
@@ -106,7 +115,7 @@ namespace HangmanClient.Network
                     var code = (OperationCodes)message[0];
                         switch (code)
                     {
-                        case OperationCodes.CreateRoom:
+                        case OperationCodes.SendNewRoomId:
                             HandleCreateResponse(message);
                             break;
                         case OperationCodes.JoinRoom:
@@ -121,11 +130,35 @@ namespace HangmanClient.Network
                         case OperationCodes.NotUniqueName:
                             HandleNotUniqueName();
                             break;
+                        case OperationCodes.SendWord:
+                            HandleNewWord(message);
+                            break;
+                        case OperationCodes.IncorrectLetter:
+                            HandleIncorrectLetter();
+                            break;
+                        case OperationCodes.CorrectLetter:
+                            HandleCorrectLetter();
+                            break;
                         default:
                             break;
                     }
                 }
             });
+        }
+
+        private void HandleCorrectLetter()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleIncorrectLetter()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleNewWord(string message)
+        {
+            throw new NotImplementedException();
         }
 
         private void HandleNotUniqueName()

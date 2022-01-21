@@ -14,7 +14,6 @@ namespace HangmanClient.MVVM.ViewModel
     {
         private readonly NavigationStore _navigationStore;
 
-
         public ICommand JoinCommand { get; }
         public ICommand CreateCommand { get; }
 

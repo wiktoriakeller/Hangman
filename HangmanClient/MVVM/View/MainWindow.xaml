@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" xmlns:view="clr-namespace:HangmanClient.MVVM.View"
         mc:Ignorable="d"
-        FontSize="14"
-        Title="Hangman" Height="720" Width="1280">
+        FontSize="20"
+        Title="Hangman" Height="520" Width="900">
 
 
     <Grid Margin="20 10" MaxWidth="1280">
