@@ -6,6 +6,7 @@ Player::Player(int socket, int id, int epollFd) {
 	_id = id;
 	_roomId = -1;
 	_epollFd = epollFd;
+	_hangmanState = 0;
 	epoll_event ee{ EPOLLIN | EPOLLRDHUP, {.ptr = this} };
 	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _socket, &ee);
 }
@@ -155,6 +156,9 @@ void Player::HandleOperation(const std::vector<std::string>& divided) {
 	case OperationCodes::SendWord:
 		SendWord();
 		break;
+	case OperationCodes::CheckLetter:
+		CheckLetter(divided[1][0]);
+		break;
 	default:
 		break;
 	}
@@ -189,6 +193,7 @@ void Player::SendNewRoomId(const std::vector<std::string>& divided) {
 	Game::Instance().AddRoom(generatedRoomId);
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
+	SetCurrentWord(room->GetSecretWord());
 
 	toSend += (uint8_t)OperationCodes::SendNewRoomId;
 	toSend += " ";
@@ -235,16 +240,57 @@ void Player::JoinRoom(const std::vector<std::string>& divided) {
 	messageToAll += " ";
 	messageToAll += name;
 
+	SetCurrentWord(room->GetSecretWord());
 	room->SendToAllBut(messageToAll, name);
 	PrepereToSend(toSend);
 }
 
 void Player::SendWord() {
 	std::string toSend;
-	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
-	std::string word = room->GetSecretWord();
 	toSend += (uint8_t)OperationCodes::SendWord;
 	toSend += " ";
-	toSend += word;
+	toSend += _currentWord;
 	PrepereToSend(toSend);
+}
+
+void Player::CheckLetter(char letter) {
+	std::string toSend;
+	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
+	std::string secretWord = room->GetSecretWord();
+	
+	if (room->IsLetterInWord(letter)) {
+		room->InsertCorrectLetter(letter, _currentWord);
+		toSend += (uint8_t)OperationCodes::CorrectLetter;
+		toSend += " ";
+		toSend += _currentWord;
+		PrepereToSend(toSend);
+	}
+	else {
+		_hangmanState++;
+		toSend += (uint8_t)OperationCodes::IncorrectLetter;
+		toSend += " ";
+		toSend += std::to_string(_hangmanState);
+		PrepereToSend(toSend);
+
+		std::string messageToAll;
+		messageToAll += (uint8_t)OperationCodes::SendHangmanWithName;
+		messageToAll += " ";
+		messageToAll += _name;
+		messageToAll += " ";
+		messageToAll += std::to_string(_hangmanState);
+		std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
+		room->SendToAllBut(messageToAll, _name);
+	}
+}
+
+void Player::SetCurrentWord(std::string secretWord) {
+	_currentWord.clear();
+	for (int i = 0; i < secretWord.size(); i++) {
+		if (secretWord[i] != ' ') {
+			_currentWord += "*";
+		}
+		else {
+			_currentWord += "_";
+		}
+	}
 }

@@ -30,8 +30,9 @@ enum OperationCodes {
 	CheckLetter = 11,
 	IncorrectLetter = 12,
 	CorrectLetter = 13,
-	PlayerLeft = 14,
-	EndGame = 15
+	SendHangmanWithName = 14,
+	PlayerLeft = 15,
+	EndGame = 16
 };
 
 enum HandleResult {

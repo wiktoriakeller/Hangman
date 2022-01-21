@@ -22,6 +22,8 @@ private:
 	int _id;
 	int _roomId;
 	int _epollFd;
+	int _hangmanState;
+	std::string _currentWord;
 	std::string _name;
 	std::vector<char> currentMessagesToRead;
 	std::vector<std::string> currentMessagesToSend;
@@ -29,9 +31,11 @@ private:
 	void WaitForWrite(bool epollout);
 	void HandleOperation(const std::vector<std::string>& divided);
 	void ParseMessage(std::string message);	
+	void SetCurrentWord(std::string secretWord);
 
 	//operation codes handlers
 	void SendNewRoomId(const std::vector<std::string>& divided);
 	void JoinRoom(const std::vector<std::string>& divided);
 	void SendWord();
+	void CheckLetter(char letter);
 };
