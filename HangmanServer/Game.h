@@ -1,7 +1,8 @@
 #pragma once
 
-#include <map>
 #include "Room.h"
+#include <map>
+#include <limits>
 
 class Game {
 public:
@@ -25,9 +26,9 @@ public:
 
 private:
 	const int LOWER_BOUND_ROOM = 0;
-	const int UPPER_BOUND_ROOM = 5000;
+	const int UPPER_BOUND_ROOM = std::numeric_limits<int>::max();
 	const int LOWER_BOUND_PLAYER = 0;
-	const int UPPER_BOUND_PLAYER = 20000;
+	const int UPPER_BOUND_PLAYER = std::numeric_limits<int>::max();;
 
 	std::shared_ptr<Handler> _server;
 	std::map<int, std::shared_ptr<Room>> _roomsMap;

@@ -12,8 +12,8 @@ public:
 	std::shared_ptr<Player> GetPlayer(const std::string& name);
 	void DeletePlayer(std::string name);
 	void DeleteAllPlayersInRoom();
-	void SendToAllBut(std::string message, std::string name);
-	bool IsNameUnique(std::string name);
+	void SendToAllBut(std::string message, const std::string& name);
+	bool IsNameUnique(const std::string& name);
 	bool IsRoomFull();
 	std::string GetAllPlayerNamesBut(const std::string& name);
 

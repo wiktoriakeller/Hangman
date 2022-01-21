@@ -27,14 +27,14 @@ void Room::DeleteAllPlayersInRoom() {
 	_playersInRoom.clear();
 }
 
-void Room::SendToAllBut(std::string message, std::string name) {
+void Room::SendToAllBut(std::string message, const std::string& name) {
 	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
 		if(it->first != name)
 			it->second->PrepereToSend(message);
 	}
 }
 
-bool Room::IsNameUnique(std::string name) {
+bool Room::IsNameUnique(const std::string& name) {
 	if (_playersInRoom.find(name) != _playersInRoom.end())
 		return false;
 

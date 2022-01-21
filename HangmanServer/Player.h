@@ -7,9 +7,9 @@ public:
 	Player(int socket, int id, int epollFd);
 	void Close() override;
 	HandleResult Handle(uint events) override;
-	void SetId(int id);
+	void SetId(const int& id);
 	int GetId();
-	void SetName(std::string name);
+	void SetName(const std::string& name);
 	std::string GetName();
 	void SetRoomId(int id);
 	int GetRoomId();
@@ -17,7 +17,7 @@ public:
 	void PrepereToSend(std::string message);
 
 private:
-	const size_t BUFFER_SIZE = 24;
+	const size_t BUFFER_SIZE = 64;
 	int _socket;
 	int _id;
 	int _roomId;
@@ -27,12 +27,10 @@ private:
 	std::vector<std::string> currentMessagesToSend;
 
 	void WaitForWrite(bool epollout);
-	void HandleOperation(std::vector<std::string>& divided);
+	void HandleOperation(const std::vector<std::string>& divided);
 	void ParseMessage(std::string message);	
 
 	//operation codes handlers
-	std::string SendNewRoomId(std::vector<std::string>& divided);
-	std::string JoinRoom(std::vector<std::string>& divided);
-	std::string SendPlayerName(std::vector<std::string>& divided);
-	std::string SendAllPlayerNames(std::vector<std::string>& divided);
+	std::string SendNewRoomId(const std::vector<std::string>& divided);
+	std::string JoinRoom(const std::vector<std::string>& divided);
 };

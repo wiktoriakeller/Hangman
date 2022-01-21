@@ -26,7 +26,7 @@ void Player::CloseSocket() {
 	printf("Player socket closed\n");
 }
 
-void Player::SetId(int id) {
+void Player::SetId(const int& id) {
 	_id = id;
 }
 
@@ -34,7 +34,7 @@ int Player::GetId() {
 	return _id;
 }
 
-void Player::SetName(std::string name) {
+void Player::SetName(const std::string& name) {
 	_name = name;
 }
 
@@ -140,7 +140,7 @@ void Player::PrepereToSend(std::string message) {
 	}
 }
 
-void Player::HandleOperation(std::vector<std::string>& divided) {
+void Player::HandleOperation(const std::vector<std::string>& divided) {
 	//OperationCodes operationType = (OperationCodes)divided[0][0];
 	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
 	std::string toSend;
@@ -179,7 +179,7 @@ void Player::ParseMessage(std::string message) {
 	HandleOperation(divided);
 }
 
-std::string Player::SendNewRoomId(std::vector<std::string>& divided) {
+std::string Player::SendNewRoomId(const std::vector<std::string>& divided) {
 	std::string toSend;
 	std::string name = divided[1];
 	int generatedRoomId = Game::Instance().GetFreeRoomId();
@@ -196,7 +196,7 @@ std::string Player::SendNewRoomId(std::vector<std::string>& divided) {
 	return toSend;
 }
 
-std::string Player::JoinRoom(std::vector<std::string>& divided) {
+std::string Player::JoinRoom(const std::vector<std::string>& divided) {
 	std::string toSend;
 	int roomId = stoi(divided[1]);
 	std::string name = divided[2];

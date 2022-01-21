@@ -55,7 +55,6 @@ void Game::DeleteRoom(int id) {
 
 void Game::DeleteAllPlayers() {
 	printf("Deleting all players\n");
-	auto itr = _playersMap.begin();
 	for (auto it = _playersMap.begin(); it != _playersMap.end(); it++)
 		it->second->CloseSocket();
 
