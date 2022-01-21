@@ -25,8 +25,10 @@ namespace HangmanClient.MVVM.Commands
 
         public override void Execute(object? parameter)
         {
-            _server.CreateRoom(_viewModel.Username);
-            _navigationCommand.Execute(parameter);
+            if (_server.CreateRoom(_viewModel.Username))
+            {
+                _navigationCommand.Execute(parameter);
+            }
         }
 
         public override bool CanExecute(object? parameter)

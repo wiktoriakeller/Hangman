@@ -27,7 +27,7 @@ namespace HangmanClient.MVVM.Commands
         public override bool CanExecute(object? parameter)
         {
             return !string.IsNullOrEmpty(_viewModel.Username) &&
-                _viewModel.RoomId > 0 &&
+                _viewModel.RoomId >= 0 &&
                 base.CanExecute(parameter);
         }
 

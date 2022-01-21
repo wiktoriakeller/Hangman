@@ -1,25 +1,48 @@
 ﻿using HangmanClient.MVVM.Model;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace HangmanClient.Stores
 {
     public class Game
     {
-        private static readonly Game _instance = new Game();
-        public ObservableCollection<Player> Players = new();
-        public int RoomId { get; set; }
-
         private Game()
         {
+            _players = new ObservableCollection<Player>();
         }
-        public static Game GetInstance()
+        private static volatile Game instance;
+        public static Game Instance
         {
-            return _instance;
+            get
+            {
+                if (instance == null)
+                {
+                    lock (m_lock)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Game();
+                        }
+                    }
+                }
+                return instance;
+            }
         }
+
+        private static object m_lock = new object();
+
+        private ObservableCollection<Player> _players;
+
+        public ObservableCollection<Player> Players
+        {
+            get
+            {
+                return _players;
+            }
+        }
+        public int RoomId { get; set; }
+
     }
 }

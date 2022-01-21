@@ -14,24 +14,6 @@
         </Grid.RowDefinitions>
         
         <TextBlock Text="Game View" FontSize="50" Grid.Row="0"/>
-            <ItemsControl ItemsSource="{Binding Players}" Grid.Row="1">
-
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
-            <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical">
-                                <TextBlock Text="{Binding Username}"/>
-                                <Image Width = "128" Source = "{Binding HangmanImage}" VerticalAlignment = "Top"
-                                    Margin = "30" Opacity = "1"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
+        <local:PlayerGallery Grid.Row="1"/>
     </Grid>
 </UserControl>

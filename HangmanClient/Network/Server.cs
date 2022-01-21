@@ -2,31 +2,42 @@
 using HangmanClient.Stores;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace HangmanClient.Network
 {
     public enum OperationCodes : byte
     {
-        JoinRoom = 0,
-        CreateRoom= 1,
-        RoomFull = 2,
+        CreateRoom = 1,
+        JoinRoom,
+        NotUniqueName,
+        InvalidRoom,
+        GameAlreadyStarted,
+        SendPlayerName,
+        SendAllPlayerNames,
+        RoomIsFull,
+        IncorrectLetter,
+        CorrectLetter,
+        GameEnd,
+        PlayerLeft
     }
 
     public class Server
     {
         private readonly TcpClient _tcpClient;
         private readonly EventWaitHandle _waitHandle = new AutoResetEvent(false);
-        private Game _game;
+        private readonly Game _game;
         private bool _operationFailed;
         public string ErrorMessage { get; private set; }
 
-
         public Server()
         {
-            _game = Game.GetInstance();
+            ErrorMessage = "";
+            _game = Game.Instance;
             _tcpClient = new TcpClient();
         }
 
@@ -61,7 +72,13 @@ namespace HangmanClient.Network
             var packet = PacketWriter.GetPacket((byte)OperationCodes.JoinRoom,
                                                 roomId.ToString() + " " + username);
             _tcpClient.Client.Send(packet);
-            return WaitForResponse();
+            if (WaitForResponse())
+            {
+                _game.Players.Add(new Player(username, 0));
+                //_game.mainPlayer.Username = username;
+                return true;
+            }
+            return false;
         }
 
         public bool CreateRoom(string username)
@@ -69,21 +86,13 @@ namespace HangmanClient.Network
             var packet = PacketWriter.GetPacket((byte)OperationCodes.CreateRoom,
                                                 username);
             _tcpClient.Client.Send(packet);
-            return WaitForResponse();
-        }
-
-        public ObservableCollection<Player> GetConnectedPlayers()
-        {
-
-            return new ObservableCollection<Player>()
+            if (WaitForResponse())
             {
-                new Player("Player1", 0),
-                new Player("Player2", 1),
-                new Player("Player3", 2),
-                new Player("Player4", 3),
-                new Player("Player5", 4),
-                new Player("Player6", 5),
-            };
+                //_game.mainPlayer.Username = username;
+                _game.Players.Add(new Player(username, 0));
+                return true;
+            }
+            return false;
         }
 
         private void ReadMessages()
@@ -95,19 +104,56 @@ namespace HangmanClient.Network
                 {
                     var message = await packetReader.GetMessageAsync();
                     var code = (OperationCodes)message[0];
-                    switch (code)
+                        switch (code)
                     {
                         case OperationCodes.CreateRoom:
                             HandleCreateResponse(message);
                             break;
-                        case OperationCodes.RoomFull:
+                        case OperationCodes.JoinRoom:
+                            HandleJoinResponse(message);
+                            break;
+                        case OperationCodes.SendPlayerName:
+                            HandleNewPlayer(message);
+                            break;
+                        case OperationCodes.RoomIsFull:
                             HandleRoomFull();
+                            break;
+                        case OperationCodes.NotUniqueName:
+                            HandleNotUniqueName();
                             break;
                         default:
                             break;
                     }
                 }
             });
+        }
+
+        private void HandleNotUniqueName()
+        {
+            _operationFailed = true;
+            ErrorMessage = "This username is already in use";
+            _waitHandle.Set();
+        }
+
+        private void HandleNewPlayer(string message)
+        {
+            var split = message.Split(' ');
+            Player player = new Player(split[1], 0);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.Players.Add(player)));
+        }
+
+        private void HandleJoinResponse(string message)
+        {
+            var split = message.Split(' ');
+            for (int i = 1; i < split.Length; i++)
+            {
+                if (split[i] != "")
+                {
+                    Player player = new Player(split[i], 0);
+                    _game.Players.Add(player);
+                }
+            }
+            _waitHandle.Set();
         }
 
         private void HandleRoomFull()
@@ -119,8 +165,8 @@ namespace HangmanClient.Network
 
         private void HandleCreateResponse(string message)
         {
-            var splited = message.Split(" ");
-            var roomId = int.Parse(splited[1]);
+            var split = message.Split(' ');
+            var roomId = int.Parse(split[1]);
             _game.RoomId = roomId;
             _waitHandle.Set();
         }
