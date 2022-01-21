@@ -2,7 +2,8 @@
 #include "Player.h"
 #include "Game.h"
 
-ServerHandler::ServerHandler() {
+ServerHandler::ServerHandler(int epollFd) {
+	_epollFd = epollFd;
 	sockaddr_in serverAddr{};
 
 	serverAddr.sin_family = AF_INET;
@@ -46,10 +47,6 @@ HandleResult ServerHandler::Handle(uint events) {
 	}
 
 	return HandleResult::None;
-}
-
-void ServerHandler::SetEpollFd(int epollFd) {
-	_epollFd = epollFd;
 }
 
 int ServerHandler::GetServerSocket() {

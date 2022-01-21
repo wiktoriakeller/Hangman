@@ -1,4 +1,27 @@
 #include "Game.h"
+#include <fstream>
+#include <random>
+
+void Game::LoadWords() {
+	std::fstream wordsFile;
+	wordsFile.open("Files//words.txt", std::ios::in);
+	std::string word;
+
+	if (wordsFile.is_open()) {
+		while (wordsFile) {
+			std::getline(wordsFile, word);
+			if (word != "")
+				words.emplace_back(word);
+		}
+	}
+}
+
+std::string Game::GetRandomWord() {
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_int_distribution<std::mt19937::result_type> dist(0, words.size());
+	return words[dist(rng)];
+}
 
 int Game::GetFreeRoomId() {
 	for (int i = LOWER_BOUND_ROOM; i <= UPPER_BOUND_ROOM; i++) {

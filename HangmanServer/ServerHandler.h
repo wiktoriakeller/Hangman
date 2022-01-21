@@ -3,10 +3,9 @@
 
 class ServerHandler : public Handler {
 public:
-	ServerHandler();
+	ServerHandler(int epollFd);
 	void Close() override;
 	HandleResult Handle(uint events) override;
-	void SetEpollFd(int epollFd);
 	int GetServerSocket();
 
 private:

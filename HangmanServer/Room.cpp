@@ -1,7 +1,9 @@
 #include "Room.h"
+#include "Game.h"
 
 Room::Room(int id) {
 	_roomId = id;
+	_secretWord = Game::Instance().GetRandomWord();
 }
 
 int Room::GetRoomId() {
@@ -45,6 +47,10 @@ bool Room::IsRoomFull() {
 	if (_playersInRoom.size() == ROOM_MAX_SIZE)
 		return true;
 	return false;
+}
+
+std::string Room::GetSecretWord() {
+	return _secretWord;
 }
 
 std::string Room::GetAllPlayerNamesBut(const std::string& name) {

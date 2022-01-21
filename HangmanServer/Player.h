@@ -31,6 +31,7 @@ private:
 	void ParseMessage(std::string message);	
 
 	//operation codes handlers
-	std::string SendNewRoomId(const std::vector<std::string>& divided);
-	std::string JoinRoom(const std::vector<std::string>& divided);
+	void SendNewRoomId(const std::vector<std::string>& divided);
+	void JoinRoom(const std::vector<std::string>& divided);
+	void SendWord();
 };

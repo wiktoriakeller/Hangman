@@ -19,17 +19,19 @@
 
 enum OperationCodes {
 	SendNewRoomId = 1,
-	JoinRoom,
-	NotUniqueName,
-	InvalidRoom,
-	GameAlreadyStarted,
-	SendPlayerName,
-	SendAllPlayerNames,
-	RoomIsFull,
-	IncorrectLetter,
-	CorrectLetter,
-	GameEnd,
-	PlayerLeft
+	JoinRoom = 2,
+	NotUniqueName = 3,
+	InvalidRoom = 4,
+	GameAlreadyStarted = 5,
+	SendPlayerName = 6,
+	SendAllPlayerNames = 7,
+	RoomIsFull = 8,
+	SendWord = 9,
+	CheckLetter = 11,
+	IncorrectLetter = 12,
+	CorrectLetter = 13,
+	PlayerLeft = 14,
+	EndGame = 15
 };
 
 enum HandleResult {

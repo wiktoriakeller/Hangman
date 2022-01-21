@@ -15,10 +15,12 @@ public:
 	void SendToAllBut(std::string message, const std::string& name);
 	bool IsNameUnique(const std::string& name);
 	bool IsRoomFull();
+	std::string GetSecretWord();
 	std::string GetAllPlayerNamesBut(const std::string& name);
 
 private:
 	int _roomId;
+	std::string _secretWord;
 	const int ROOM_MAX_SIZE = 6;
 	std::map<std::string, std::shared_ptr<Player>> _playersInRoom;
 };

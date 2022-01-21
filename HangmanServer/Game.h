@@ -2,6 +2,7 @@
 
 #include "Room.h"
 #include <map>
+#include <vector>
 #include <limits>
 
 class Game {
@@ -11,6 +12,8 @@ public:
 		return instance;
 	}
 
+	void LoadWords();
+	std::string GetRandomWord();
 	int GetFreeRoomId();
 	int GetFreePlayerId();
 	void AddRoom(int id);
@@ -33,6 +36,7 @@ private:
 	std::shared_ptr<Handler> _server;
 	std::map<int, std::shared_ptr<Room>> _roomsMap;
 	std::map<int, std::shared_ptr<Player>> _playersMap;
+	std::vector<std::string> words;
 
 	Game() {};
 	Game(const Game&) = delete;

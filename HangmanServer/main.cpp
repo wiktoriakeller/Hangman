@@ -22,16 +22,15 @@
 void ctrl_c(int);
 
 int main() {
-	std::shared_ptr<Handler> handler = std::make_shared<ServerHandler>();
-	std::shared_ptr<ServerHandler> serverHandler = std::dynamic_pointer_cast<ServerHandler>(handler);
-
-	int epollFd = epoll_create1(0);
 	signal(SIGINT, ctrl_c);
+	int epollFd = epoll_create1(0);
+	std::shared_ptr<Handler> handler = std::make_shared<ServerHandler>(epollFd);
+	std::shared_ptr<ServerHandler> serverHandler = std::dynamic_pointer_cast<ServerHandler>(handler);
 
 	epoll_event epollEvent{ EPOLLIN, {.ptr = static_cast<void*>(handler.get()) }};
 	epoll_ctl(epollFd, EPOLL_CTL_ADD, serverHandler->GetServerSocket(), &epollEvent);
-	serverHandler->SetEpollFd(epollFd);
 	Game::Instance().SetServer(handler);
+	Game::Instance().LoadWords();
 
 	while (true) {
 		if (-1 == epoll_wait(epollFd, &epollEvent, 1, -1)) {

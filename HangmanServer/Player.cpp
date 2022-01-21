@@ -143,17 +143,18 @@ void Player::PrepereToSend(std::string message) {
 void Player::HandleOperation(const std::vector<std::string>& divided) {
 	//OperationCodes operationType = (OperationCodes)divided[0][0];
 	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
-	std::string toSend;
 
 	switch (operationType)
 	{
 	case OperationCodes::SendNewRoomId:
-		toSend = SendNewRoomId(divided);
-		PrepereToSend(toSend);
+		SendNewRoomId(divided);
 		break;
 	case OperationCodes::JoinRoom:
-		toSend = JoinRoom(divided);
-		PrepereToSend(toSend);
+		JoinRoom(divided);
+		break;
+	case OperationCodes::SendWord:
+		SendWord();
+		break;
 	default:
 		break;
 	}
@@ -179,7 +180,7 @@ void Player::ParseMessage(std::string message) {
 	HandleOperation(divided);
 }
 
-std::string Player::SendNewRoomId(const std::vector<std::string>& divided) {
+void Player::SendNewRoomId(const std::vector<std::string>& divided) {
 	std::string toSend;
 	std::string name = divided[1];
 	int generatedRoomId = Game::Instance().GetFreeRoomId();
@@ -189,49 +190,61 @@ std::string Player::SendNewRoomId(const std::vector<std::string>& divided) {
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
-	toSend += std::to_string((int)OperationCodes::SendNewRoomId);
+	toSend += (uint8_t)OperationCodes::SendNewRoomId;
 	toSend += " ";
 	toSend += std::to_string(generatedRoomId);
 
-	return toSend;
+	PrepereToSend(toSend);
 }
 
-std::string Player::JoinRoom(const std::vector<std::string>& divided) {
+void Player::JoinRoom(const std::vector<std::string>& divided) {
 	std::string toSend;
 	int roomId = stoi(divided[1]);
 	std::string name = divided[2];
 	
 	if (!Game::Instance().DoesRoomExist(roomId)) {
-		toSend += std::to_string((int)OperationCodes::InvalidRoom);
-		return toSend;
+		toSend += (uint8_t)OperationCodes::InvalidRoom;
+		PrepereToSend(toSend);
+		return;
 	}
 	
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
 
 	if (!room->IsNameUnique(name)) {
-		toSend += std::to_string((int)OperationCodes::NotUniqueName);
-		return toSend;
+		toSend += (uint8_t)OperationCodes::NotUniqueName;
+		PrepereToSend(toSend);
+		return;
 	}
 
 	if (room->IsRoomFull()) {
-		toSend += std::to_string((int)OperationCodes::RoomIsFull);
-		return toSend;
+		toSend += (uint8_t)OperationCodes::RoomIsFull;
+		PrepereToSend(toSend);
+		return;
 	}
 
 	SetName(name);
 	SetRoomId(roomId);
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
-	toSend += std::to_string((int)OperationCodes::JoinRoom);
+	toSend += (uint8_t)OperationCodes::JoinRoom;
 	toSend += " ";
 	toSend += room->GetAllPlayerNamesBut(name);
 
 	std::string messageToAll;
-	messageToAll += std::to_string((int)OperationCodes::SendPlayerName);
+	messageToAll += (uint8_t)OperationCodes::SendPlayerName;
 	messageToAll += " ";
 	messageToAll += name;
 
 	room->SendToAllBut(messageToAll, name);
+	PrepereToSend(toSend);
+}
 
-	return toSend;
+void Player::SendWord() {
+	std::string toSend;
+	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
+	std::string word = room->GetSecretWord();
+	toSend += (uint8_t)OperationCodes::SendWord;
+	toSend += " ";
+	toSend += word;
+	PrepereToSend(toSend);
 }
