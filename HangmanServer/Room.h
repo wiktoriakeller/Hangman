@@ -17,6 +17,8 @@ public:
 	bool IsRoomFull();
 	std::string GetSecretWord();
 	std::string GetAllPlayerNamesBut(const std::string& name);
+	bool IsLetterInWord(char letter);
+	void InsertCorrectLetter(char letter, std::string& word);
 
 private:
 	int _roomId;

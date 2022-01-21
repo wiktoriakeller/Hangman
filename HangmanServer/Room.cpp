@@ -65,3 +65,17 @@ std::string Room::GetAllPlayerNamesBut(const std::string& name) {
 
 	return all;
 }
+
+bool Room::IsLetterInWord(char letter) {
+	if (_secretWord.find(letter) != std::string::npos)
+		return true;
+	return false;
+}
+
+void Room::InsertCorrectLetter(char letter, std::string& word) {
+	for (int i = 0; i < _secretWord.size(); i++) {
+		if (_secretWord[i] == letter) {
+			word[i] = letter;
+		}
+	}
+}

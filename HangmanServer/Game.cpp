@@ -20,7 +20,7 @@ std::string Game::GetRandomWord() {
 	std::random_device dev;
 	std::mt19937 rng(dev());
 	std::uniform_int_distribution<std::mt19937::result_type> dist(0, words.size());
-	return words[dist(rng)];
+	return "robo haslo";
 }
 
 int Game::GetFreeRoomId() {
