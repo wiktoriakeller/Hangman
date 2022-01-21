@@ -33,7 +33,7 @@ namespace HangmanClient.MVVM.Commands
 
         public override void Execute(object? parameter)
         {
-            if (_server.JoinRoom(_viewModel.RoomId, new Model.Player(_viewModel.Username, 0)))
+            if (_server.JoinRoom(_viewModel.RoomId, _viewModel.Username))
             {
                 _navigationCommand.Execute(parameter);
             }
