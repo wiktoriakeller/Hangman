@@ -62,3 +62,16 @@ bool Room::IsRoomFull() {
 		return true;
 	return false;
 }
+
+std::string Room::GetAllPlayerNamesBut(const std::string& name) {
+	std::string all = "";
+
+	for (int i = 0; i < _playersInRoom.size(); i++) {
+		if (_playersInRoom[i]->GetName() != name) {
+			all += _playersInRoom[i]->GetName();
+			all += " ";
+		}
+	}
+
+	return all;
+}

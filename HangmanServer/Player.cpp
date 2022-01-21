@@ -141,6 +141,7 @@ void Player::PrepereToSend(std::string message) {
 }
 
 void Player::HandleOperation(std::vector<std::string>& splitted) {
+	//OperationCodes operationType = (OperationCodes)splitted[0][0];
 	OperationCodes operationType = (OperationCodes)stoi(splitted[0] + '\0');
 	std::string toSend;
 
@@ -216,11 +217,20 @@ std::string Player::JoinRoom(std::vector<std::string>& splitted) {
 		return toSend;
 	}
 
-	toSend += std::to_string((int)OperationCodes::JoinRoom);
-
 	SetName(name);
 	SetRoomId(roomId);
 	room->AddPlayer(Game::Instance().GetPlayer(_id));
+
+	toSend += std::to_string((int)OperationCodes::JoinRoom);
+	toSend += " ";
+	toSend += room->GetAllPlayerNamesBut(name);
+
+	std::string messageToAll;
+	messageToAll += std::to_string((int)OperationCodes::SendPlayerName);
+	messageToAll += " ";
+	messageToAll += name;
+
+	room->SendToAllBut(messageToAll, name);
 
 	return toSend;
 }

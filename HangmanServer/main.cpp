@@ -28,7 +28,7 @@ int main() {
 	int epollFd = epoll_create1(0);
 	signal(SIGINT, ctrl_c);
 
-	epoll_event epollEvent{ EPOLLIN, {.ptr = handler.get() }};
+	epoll_event epollEvent{ EPOLLIN, {.ptr = static_cast<void*>(handler.get()) }};
 	epoll_ctl(epollFd, EPOLL_CTL_ADD, serverHandler->GetServerSocket(), &epollEvent);
 	serverHandler->SetEpollFd(epollFd);
 	Game::Instance().SetServer(handler);
@@ -37,18 +37,19 @@ int main() {
 		if (-1 == epoll_wait(epollFd, &epollEvent, 1, -1)) {
 			error(1, errno, "Epoll failed");
 			printf("Epoll failed");
-			handler->Close();
-			exit(0);
+			break;
 		}
 
 		if (epollEvent.data.ptr != nullptr) {
-			HandleResult result = ((Handler*)epollEvent.data.ptr)->Handle(epollEvent.events);
+			HandleResult result = (static_cast<Handler*>(epollEvent.data.ptr))->Handle(epollEvent.events);
 			
 			if (result == HandleResult::DeleteServer) {
-				ctrl_c(SIGINT);
+				break;
 			}
 		}
 	}
+
+	Game::Instance().EndGame();
 }
 
 void ctrl_c(int) {

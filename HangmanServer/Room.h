@@ -15,6 +15,7 @@ public:
 	void SendToAllBut(std::string message, std::string name);
 	bool IsNameUnique(std::string name);
 	bool IsRoomFull();
+	std::string GetAllPlayerNamesBut(const std::string& name);
 
 private:
 	int _roomId;
