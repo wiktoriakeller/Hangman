@@ -27,12 +27,12 @@ private:
 	std::vector<std::string> currentMessagesToSend;
 
 	void WaitForWrite(bool epollout);
-	void HandleOperation(std::vector<std::string>& splitted);
+	void HandleOperation(std::vector<std::string>& divided);
 	void ParseMessage(std::string message);	
 
 	//operation codes handlers
-	std::string SendNewRoomId(std::vector<std::string>& splitted);
-	std::string JoinRoom(std::vector<std::string>& splitted);
-	std::string SendPlayerName(std::vector<std::string>& splitted);
-	std::string SendAllPlayerNames(std::vector<std::string>& splitted);
+	std::string SendNewRoomId(std::vector<std::string>& divided);
+	std::string JoinRoom(std::vector<std::string>& divided);
+	std::string SendPlayerName(std::vector<std::string>& divided);
+	std::string SendAllPlayerNames(std::vector<std::string>& divided);
 };

@@ -8,51 +8,35 @@ int Room::GetRoomId() {
 	return _roomId;
 }
 
-void Room::AddPlayer(std::shared_ptr<Player> player) {
-	_playersInRoom.emplace_back(player);
+void Room::AddPlayer(std::shared_ptr<Player> player, std::string name) {
+	_playersInRoom[name] = player;
 }
 
-std::shared_ptr<Player> Room::GetPlayer(std::string name){
-	for (int i = 0; i < _playersInRoom.size(); i++) {
-		if (_playersInRoom[i]->GetName() == name)
-			return _playersInRoom[i];
-	}
+std::shared_ptr<Player> Room::GetPlayer(const std::string& name){
+	if (_playersInRoom.find(name) != _playersInRoom.end())
+		return _playersInRoom[name];
 
 	return nullptr;
 }
 
 void Room::DeletePlayer(std::string name) {
-	int toDelte = -1;
-
-	for (int i = 0; i < _playersInRoom.size(); i++) {
-		if (_playersInRoom[i]->GetName() == name) {
-			toDelte = i;
-			break;
-		}
-	}
-
-	if (toDelte != -1)
-		_playersInRoom.erase(_playersInRoom.begin() + toDelte);
+	_playersInRoom.erase(name);
 }
 
 void Room::DeleteAllPlayersInRoom() {
-	for (int i = _playersInRoom.size() - 1; i >= 0; i++) {
-		_playersInRoom.pop_back();
-	}
+	_playersInRoom.clear();
 }
 
 void Room::SendToAllBut(std::string message, std::string name) {
-	for (int i = 0; i < _playersInRoom.size(); i++) {
-		if (_playersInRoom[i]->GetName() != name)
-			_playersInRoom[i]->PrepereToSend(message);
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		if(it->first != name)
+			it->second->PrepereToSend(message);
 	}
 }
 
 bool Room::IsNameUnique(std::string name) {
-	for (size_t i = 0; i < _playersInRoom.size(); i++) {
-		if (_playersInRoom[i]->GetName() == name)
-			return false;
-	}
+	if (_playersInRoom.find(name) != _playersInRoom.end())
+		return false;
 
 	return true;
 }
@@ -66,9 +50,9 @@ bool Room::IsRoomFull() {
 std::string Room::GetAllPlayerNamesBut(const std::string& name) {
 	std::string all = "";
 
-	for (int i = 0; i < _playersInRoom.size(); i++) {
-		if (_playersInRoom[i]->GetName() != name) {
-			all += _playersInRoom[i]->GetName();
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		if (it->first != name) {
+			all += it->second->GetName();
 			all += " ";
 		}
 	}

@@ -378,3 +378,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /valgrind-out.txt
+server

@@ -140,19 +140,19 @@ void Player::PrepereToSend(std::string message) {
 	}
 }
 
-void Player::HandleOperation(std::vector<std::string>& splitted) {
-	//OperationCodes operationType = (OperationCodes)splitted[0][0];
-	OperationCodes operationType = (OperationCodes)stoi(splitted[0] + '\0');
+void Player::HandleOperation(std::vector<std::string>& divided) {
+	//OperationCodes operationType = (OperationCodes)divided[0][0];
+	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
 	std::string toSend;
 
 	switch (operationType)
 	{
 	case OperationCodes::SendNewRoomId:
-		toSend = SendNewRoomId(splitted);
+		toSend = SendNewRoomId(divided);
 		PrepereToSend(toSend);
 		break;
 	case OperationCodes::JoinRoom:
-		toSend = JoinRoom(splitted);
+		toSend = JoinRoom(divided);
 		PrepereToSend(toSend);
 	default:
 		break;
@@ -160,15 +160,15 @@ void Player::HandleOperation(std::vector<std::string>& splitted) {
 }
 
 void Player::ParseMessage(std::string message) {
-	std::vector<std::string> splitted;
+	std::vector<std::string> divided;
 	std::string messagePart;
 
 	for (size_t i = 0; i < message.size(); i++) {
 		if (message[i] == '\n' && messagePart.size() != 0) {
-			splitted.emplace_back(messagePart);
+			divided.emplace_back(messagePart);
 		}
 		else if (message[i] == ' ') {
-			splitted.emplace_back(messagePart);
+			divided.emplace_back(messagePart);
 			messagePart.clear();
 		}
 		else {
@@ -176,17 +176,18 @@ void Player::ParseMessage(std::string message) {
 		}
 	}
 
-	HandleOperation(splitted);
+	HandleOperation(divided);
 }
 
-std::string Player::SendNewRoomId(std::vector<std::string>& splitted) {
+std::string Player::SendNewRoomId(std::vector<std::string>& divided) {
 	std::string toSend;
+	std::string name = divided[1];
 	int generatedRoomId = Game::Instance().GetFreeRoomId();
-	SetName(splitted[1]);
+	SetName(name);
 	SetRoomId(generatedRoomId);
 	Game::Instance().AddRoom(generatedRoomId);
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
-	room->AddPlayer(Game::Instance().GetPlayer(_id));
+	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
 	toSend += std::to_string((int)OperationCodes::SendNewRoomId);
 	toSend += " ";
@@ -195,10 +196,10 @@ std::string Player::SendNewRoomId(std::vector<std::string>& splitted) {
 	return toSend;
 }
 
-std::string Player::JoinRoom(std::vector<std::string>& splitted) {
+std::string Player::JoinRoom(std::vector<std::string>& divided) {
 	std::string toSend;
-	int roomId = stoi(splitted[1]);
-	std::string name = splitted[2];
+	int roomId = stoi(divided[1]);
+	std::string name = divided[2];
 	
 	if (!Game::Instance().DoesRoomExist(roomId)) {
 		toSend += std::to_string((int)OperationCodes::InvalidRoom);
@@ -219,7 +220,7 @@ std::string Player::JoinRoom(std::vector<std::string>& splitted) {
 
 	SetName(name);
 	SetRoomId(roomId);
-	room->AddPlayer(Game::Instance().GetPlayer(_id));
+	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
 	toSend += std::to_string((int)OperationCodes::JoinRoom);
 	toSend += " ";

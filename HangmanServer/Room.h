@@ -2,14 +2,14 @@
 
 #include "Player.h"
 #include<memory>
-#include<vector>
+#include<map>
 
 class Room {
 public:
 	Room(int id);
 	int GetRoomId();
-	void AddPlayer(std::shared_ptr<Player> player);
-	std::shared_ptr<Player> GetPlayer(std::string name);
+	void AddPlayer(std::shared_ptr<Player> player, std::string name);
+	std::shared_ptr<Player> GetPlayer(const std::string& name);
 	void DeletePlayer(std::string name);
 	void DeleteAllPlayersInRoom();
 	void SendToAllBut(std::string message, std::string name);
@@ -20,5 +20,5 @@ public:
 private:
 	int _roomId;
 	const int ROOM_MAX_SIZE = 6;
-	std::vector<std::shared_ptr<Player>> _playersInRoom;
+	std::map<std::string, std::shared_ptr<Player>> _playersInRoom;
 };
