@@ -3,11 +3,11 @@
 namespace HangmanClient.MVVM.View
 {
     /// <summary>
-    /// Logika interakcji dla klasy MainMenuView.xaml
+    /// Logika interakcji dla klasy MainPlayerView.xaml
     /// </summary>
-    public partial class MainMenuView : UserControl
+    public partial class MainPlayerView : UserControl
     {
-        public MainMenuView()
+        public MainPlayerView()
         {
             InitializeComponent();
         }

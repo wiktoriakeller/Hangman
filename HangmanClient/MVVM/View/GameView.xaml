@@ -5,33 +5,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HangmanClient.MVVM.View" xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:GameViewModel}"
              mc:Ignorable="d" 
-             d:DesignHeight="720" d:DesignWidth="1280">
+             d:DesignHeight="520" d:DesignWidth="900"
+             >
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+        <Grid.RowDefinitions> 
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Text="Game View" FontSize="50" Grid.Row="0"/>
-            <ItemsControl ItemsSource="{Binding Players}" Grid.Row="1">
 
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
-            <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical">
-                                <TextBlock Text="{Binding Username}"/>
-                                <Image Width = "128" Source = "{Binding HangmanImage}" VerticalAlignment = "Top"
-                                    Margin = "30" Opacity = "1"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
+        <DockPanel LastChildFill="True">
+            <local:RoomNumberView DockPanel.Dock="Top" FontSize="32" 
+                                  Height="42" Width="350" 
+                                  HorizontalAlignment="Left"/>
+            <local:PlayerGallery  DockPanel.Dock="Bottom" MinHeight="150"/>
+            <local:MainPlayerView  DockPanel.Dock="Right" MinWidth="50" MinHeight="150"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Text="Select a letter: " VerticalAlignment="Top"/>
+                <TextBox MinWidth="20" MaxLength="1"
+                         HorizontalContentAlignment="Center"
+                         Margin="15 0" VerticalAlignment="Top"
+                         Text="{Binding PlayerInput, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="Submit" VerticalAlignment="Top" 
+                        Command="{Binding SubmitLetter}"/>
+                <local:SecretWordView/>
+            </StackPanel>
+        </DockPanel>
     </Grid>
 </UserControl>

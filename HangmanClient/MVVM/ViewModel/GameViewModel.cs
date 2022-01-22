@@ -1,33 +1,29 @@
-﻿using HangmanClient.MVVM.Model;
+﻿using HangmanClient.MVVM.Commands;
 using HangmanClient.Network;
-using HangmanClient.Stores;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace HangmanClient.MVVM.ViewModel
 {
     public class GameViewModel : ViewModelBase
     {
         private readonly Server _server;
-
-        private ObservableCollection<Player> _players;
-
-        public ObservableCollection<Player> Players
+        private string _playerInput;
+        public string PlayerInput
         {
-            get { return _players; }
-            set { _players = value;
-                OnPropertyChanged(nameof(Players));
+            get { return _playerInput; }
+            set
+            {
+                _playerInput = value;
+                OnPropertyChanged(nameof(PlayerInput));
             }
         }
-
+        public ICommand SubmitLetter { get; }
         public GameViewModel(Server server)
         {
             _server = server;
-            _players = server.GetConnectedPlayers();
+            _playerInput = "";
+            SubmitLetter = new SubmitCommand(this, server);
         }
+
     }
 }

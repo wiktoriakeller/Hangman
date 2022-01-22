@@ -1,22 +1,51 @@
-﻿using System.IO;
+﻿using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace HangmanClient.MVVM.Model
 {
-    public class Player
+    public class Player : INotifyPropertyChanged
     {
-        public string Username { get; set; }
-        public int HangmanState { get; set; }
-        public string HangmanImage { 
-            get 
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private string username;
+        private int state;
+
+        public string Username
+        {
+            get { return username; }
+            set
             {
-                return Path.GetFullPath(@"Images\" + HangmanState.ToString() + ".bmp"); 
-            } 
+                username = value;
+                OnPropertyChanged();
+            }
+        }
+        public int HangmanState
+        {
+            get { return state; }
+            set
+            {
+                state = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HangmanImage));
+            }
+        }
+        public string HangmanImage
+        {
+            get
+            {
+                return Path.GetFullPath(@"Images\" + state.ToString() + ".bmp");
+            }
         }
 
         public Player(string username, int hangmanState)
         {
             Username = username;
             HangmanState = hangmanState;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

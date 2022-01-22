@@ -2,17 +2,13 @@
 using HangmanClient.Network;
 using HangmanClient.Stores;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace HangmanClient.MVVM.ViewModel
 {
     public class CreateRoomViewModel : ViewModelBase
     {
-        
+
         private readonly Server _server;
         private string _username;
         public string Username
@@ -40,6 +36,6 @@ namespace HangmanClient.MVVM.ViewModel
             CreateRoomCommand = new CreateRoomCommand(this, server);
         }
 
-        
+
     }
 }

@@ -1,11 +1,6 @@
 ﻿using HangmanClient.MVVM.ViewModel;
 using HangmanClient.Network;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HangmanClient.MVVM.Commands
 {
@@ -25,8 +20,10 @@ namespace HangmanClient.MVVM.Commands
 
         public override void Execute(object? parameter)
         {
-            _server.CreateRoom(_viewModel.Username);
-            _navigationCommand.Execute(parameter);
+            if (_server.CreateRoom(_viewModel.Username))
+            {
+                _navigationCommand.Execute(parameter);
+            }
         }
 
         public override bool CanExecute(object? parameter)

@@ -14,30 +14,28 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         
-        <TextBlock Text="Join a Room" Grid.Row="0" FontSize="20"/>
-
-        <Grid Grid.Row="1" Margin="10 20 10 0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <TextBlock Text="Room ID" Grid.Row="0" />
-            <TextBox Grid.Row="1" Text="{Binding RoomId , UpdateSourceTrigger=PropertyChanged}" Margin="0 5 0 0"/>
-        </Grid>
+        <TextBlock Text="Join a Room" Grid.Row="0" FontSize="32"/>
+        
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <TextBlock HorizontalAlignment="Center" Margin="0 0 300 0" Text="Room ID" />
+            <TextBox  MaxWidth="350" MaxLength="10" 
+                      Text="{Binding RoomId , UpdateSourceTrigger=PropertyChanged}" Margin="0 5 0 0"/>
+        </StackPanel>
 
         <Grid Grid.Row="2" Margin="10 10 10 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Username" Grid.Row="0" />
-            <TextBox Grid.Row="1" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0 5 0 0"/>
+            <TextBlock HorizontalAlignment="Center" Margin="0 0 300 0" Text="Username" Grid.Row="0" />
+            <TextBox Grid.Row="1" MaxLength="24" MaxWidth="350"
+                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0 5 0 0"/>
         </Grid>
 
-        <StackPanel Grid.Row="3" Margin="10 20 10 0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="3" Margin="0 20 0 0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="JOIN" Width="150" Padding="5 5 5 5"
-                    Margin="20 0" Command="{Binding JoinCommand}"/>
-            <Button Content="BACK" Width="50" Padding="5 5 5 5"
+                    Margin="0 0 20 0" Command="{Binding JoinCommand}"/>
+            <Button Content="BACK" Width="150" Padding="5 5 5 5"
                     Command="{Binding BackCommand}"/>
         </StackPanel>
 
