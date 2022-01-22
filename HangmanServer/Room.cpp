@@ -41,7 +41,7 @@ std::tuple<HandleResult, int, int, std::string> Room::Handle(uint events) {
 			setTimer = true;
 		}
 		else if (_gameStarted) {
-			SendWinnder();
+			SendWinner();
 			return std::make_tuple(HandleResult::EndGameInRoom, _roomId, 0, "");
 		}
 	}
@@ -109,14 +109,14 @@ std::string Room::GetAllPlayerNamesBut(const std::string& name) {
 	return all;
 }
 
-bool Room::IsLetterInWord(char letter) {
+bool Room::IsLetterInSecretWord(char letter) {
 	if (_secretWord.find(letter) != std::string::npos)
 		return true;
 	return false;
 }
 
 void Room::InsertCorrectLetter(char letter, std::string& word) {
-	for (size_t i = 0; i < _secretWord.size(); i++) {
+	for (int i = 0; i < _secretWord.size(); i++) {
 		if (_secretWord[i] == letter) {
 			word[i] = letter;
 		}
@@ -168,12 +168,13 @@ bool Room::GameStarted() {
 }
 
 std::string Room::GetHiddenSecretWord() {
-	std::string word;
-	for (size_t i = 0; i < _secretWord.size(); i++) {
-		if (_secretWord[i] != ' ') {
+	std::string word = "";
+	printf("%s\n", _secretWord.c_str());
+	for (int i = 0; i < _secretWord.size(); i++) {
+		if (_secretWord[i] != ' ' && _secretWord[i] != '\n' && _secretWord[i] != '\r') {
 			word += "*";
 		}
-		else {
+		else if(_secretWord[i] != '\n' && _secretWord[i] != '\r') {
 			word += "_";
 		}
 	}
@@ -192,6 +193,8 @@ std::string Room::GetWinnerPlayer() {
 		else if (max != -1 && it->second->GetPoints() == max && it->second->GetHangmanState() < Player::MAX_HANGMAN) {
 			name = "Draw";
 		}
+
+		printf("%s %d\n", it->first.c_str(), it->second->GetPoints());
 	}
 
 	if (max == -1) {
@@ -205,10 +208,15 @@ std::string Room::GetWinnerPlayer() {
 }
 
 void Room::ClearRoom() {
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		it->second->SetRoomId(-1);
+		it->second->SetName("");
+	}
+
 	_playersInRoom.clear();
 }
 
-void Room::SendWinnder() {
+void Room::SendWinner() {
 	std::string message;
 	std::string winner = GetWinnerPlayer();
 	message += (uint8_t)OperationCodes::EndGame;
@@ -226,6 +234,22 @@ bool Room::EveryoneHasHangman() {
 
 	if (number == _playersInRoom.size())
 		return true;
+	return false;
+}
+
+bool Room::WinnerFound() {
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		std::string playerWord = it->second->GetCurrentWord();
+		int foundStars = 0;
+		for (int i = 0; i < playerWord.size(); i++) {
+			if (playerWord[i] == '*')
+				foundStars++;
+		}
+
+		if (foundStars == 0 && it->second->GetHangmanState() != Player::MAX_HANGMAN)
+			return true;
+	}
+
 	return false;
 }
 

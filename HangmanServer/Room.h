@@ -18,7 +18,7 @@ public:
 	bool IsNameUnique(const std::string& name);
 	int GetNumberOfPlayers();
 	std::string GetAllPlayerNamesBut(const std::string& name);
-	bool IsLetterInWord(char letter);
+	bool IsLetterInSecretWord(char letter);
 	void InsertCorrectLetter(char letter, std::string& word);
 	void SendToAll(std::string message);
 	ParseMessegeStatus StartTimer(int time);
@@ -27,8 +27,9 @@ public:
 	std::string GetHiddenSecretWord();
 	std::string GetWinnerPlayer();
 	void ClearRoom();
-	void SendWinnder();
+	void SendWinner();
 	bool EveryoneHasHangman();
+	bool WinnerFound();
 
 private:
 	int _roomId;

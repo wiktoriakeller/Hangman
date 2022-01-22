@@ -14,6 +14,7 @@ public:
 	void PrepereToSend(std::string message);
 	int GetPoints();
 	int GetHangmanState();
+	std::string GetCurrentWord();
 
 private:
 	const size_t BUFFER_SIZE = 128;
