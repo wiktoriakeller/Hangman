@@ -50,11 +50,16 @@ int main() {
 				Game::Instance().DeletePlayerFromRoom(roomId, name);
 				printf("Player closed\n");
 
-				std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
-				if (room != nullptr) {
-					if (room->GetNumberOfPlayers() == 0)
-						room->Close();
-					Game::Instance().DeleteRoom(roomId);
+				if (roomId >= 0) {
+					std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
+					if (room != nullptr) {
+						if (room->GetNumberOfPlayers() == 0) {
+							Game::Instance().DeleteRoom(roomId);
+						}
+						else if (room->GetNumberOfPlayers() == 1) {
+							room->ResetTimer();
+						}
+					}
 				}
 			}
 			else if (std::get<0>(result) == HandleResult::DeleteRoom) {

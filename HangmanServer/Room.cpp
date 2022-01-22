@@ -147,6 +147,9 @@ ParseMessegeError Room::StartTimer(int time) {
 void Room::ResetTimer() {
 	epoll_ctl(_epollFd, EPOLL_CTL_DEL, _timerFd, nullptr);
 	_timerRegistered = false;
+	std::string message;
+	message += (uint8_t)OperationCodes::TimerStopped;
+	SendToAll(message);
 }
 
 int Room::GetNumberOfPlayers() {

@@ -212,7 +212,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	ParseMessegeError error = ParseMessegeError::NoMsgError;
 	
 	if (!Game::Instance().DoesRoomExist(roomId)) {
-		toSend += (uint8_t)OperationCodes::InvalidRoom;
+		toSend += std::to_string((int)OperationCodes::InvalidRoom);
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
 	}
@@ -220,13 +220,13 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
 
 	if (!room->IsNameUnique(name)) {
-		toSend += (uint8_t)OperationCodes::NotUniqueName;
+		toSend += std::to_string((int)OperationCodes::NotUniqueName);
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
 	}
 
 	if (room->GetNumberOfPlayers() == Room::ROOM_MAX_SIZE) {
-		toSend += (uint8_t)OperationCodes::RoomIsFull;
+		toSend += std::to_string((int)OperationCodes::RoomIsFull);
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
 	}
@@ -235,12 +235,12 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	SetRoomId(roomId);
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
-	toSend += (uint8_t)OperationCodes::JoinRoom;
+	toSend += std::to_string((int)OperationCodes::JoinRoom);
 	toSend += " ";
 	toSend += room->GetAllPlayerNamesBut(name);
 
 	std::string messageToAll;
-	messageToAll += (uint8_t)OperationCodes::SendPlayerName;
+	messageToAll += (int)OperationCodes::SendPlayerName;
 	messageToAll += " ";
 	messageToAll += name;
 
@@ -250,7 +250,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 
 	if (room->GetNumberOfPlayers() == 2) {
 		std::string message;
-		message += (uint8_t)OperationCodes::StartedWaiting;
+		message += std::to_string((int)OperationCodes::StartedWaiting);
 		message += " Started waiting";
 		room->SendToAll(message);
 		error = room->StartTimer(10);
