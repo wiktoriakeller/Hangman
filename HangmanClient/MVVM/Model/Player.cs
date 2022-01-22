@@ -24,6 +24,7 @@ namespace HangmanClient.MVVM.Model
             {
                 state = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(HangmanImage));
             }
         }
         public string HangmanImage { 

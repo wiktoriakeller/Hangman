@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:stores="clr-namespace:HangmanClient.Stores"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="900">
     <Grid>
         <ItemsControl ItemsSource="{Binding Source={x:Static stores:Game.Instance}, Path=Players}" Grid.Row="0">
 
@@ -18,10 +18,9 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="{Binding Username}"/>
-                        <TextBlock Text="{Binding HangmanState}"/>
+                        <TextBlock TextAlignment="Center" Text="{Binding Username}"/>
                         <Image Width = "128" Source = "{Binding HangmanImage}" VerticalAlignment = "Top"
-                                    Margin = "30" Opacity = "1"/>
+                                    Margin="20 10" Opacity = "1"/>
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

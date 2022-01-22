@@ -1,4 +1,6 @@
 ﻿using HangmanClient.MVVM.Model;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,6 +10,7 @@ namespace HangmanClient.Stores
 {
     public class Game : INotifyPropertyChanged
     {
+        public IDictionary<string, int> PlayerIndexes;
         public event PropertyChangedEventHandler? PropertyChanged;
         private ObservableCollection<Player> _players;
         public ObservableCollection<Player> Players
@@ -17,6 +20,7 @@ namespace HangmanClient.Stores
                 return _players;
             }
         }
+
         private int roomId;
         public int RoomId
         {
@@ -37,6 +41,7 @@ namespace HangmanClient.Stores
         private Game()
         {
             _players = new ObservableCollection<Player>();
+            PlayerIndexes = new Dictionary<string, int>();
         }
         private static volatile Game? instance;
         public static Game Instance
@@ -56,7 +61,12 @@ namespace HangmanClient.Stores
                 return instance;
             }
         }
-
         private static object m_lock = new object();
+        public void AddPlayer(Player player)
+        {
+            PlayerIndexes.Add(player.Username, Players.Count);
+            Players.Add(player);
+        }
+        public Player MainPlayer { get; set; }
     }
 }

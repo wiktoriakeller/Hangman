@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" xmlns:view="clr-namespace:HangmanClient.MVVM.View"
         mc:Ignorable="d"
-        FontSize="20"
-        Title="Hangman" Height="520" Width="900">
+        FontSize="14"
+        Title="Hangman" Height="600" Width="950">
 
 
-    <Grid Margin="20 10" MaxWidth="1280">
+    <Grid Margin="20 10 20 0" MaxWidth="1280">
         <Grid.Resources>
             <DataTemplate DataType="{x:Type viewmodel:JoinRoomViewModel}">
                 <view:JoinRoomView/>

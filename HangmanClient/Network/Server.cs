@@ -78,7 +78,7 @@ namespace HangmanClient.Network
             _tcpClient.Client.Send(packet);
             if (WaitForResponse())
             {
-                _game.Players.Add(new Player(username, 0));
+                _game.MainPlayer = new Player(username, 0);
                 _game.RoomId = roomId;
                 return true;
             }
@@ -92,7 +92,7 @@ namespace HangmanClient.Network
             _tcpClient.Client.Send(packet);
             if (WaitForResponse())
             {
-                _game.Players.Add(new Player(username, 0));
+                _game.MainPlayer = new Player(username, 0);
                 return true;
             }
             return false;
@@ -135,10 +135,13 @@ namespace HangmanClient.Network
                             HandleNewWord(split);
                             break;
                         case OperationCodes.IncorrectLetter:
-                            HandleIncorrectLetter();
+                            HandleIncorrectLetter(split);
                             break;
                         case OperationCodes.CorrectLetter:
-                            HandleCorrectLetter(split);
+                            HandleNewWord(split);
+                            break;
+                        case OperationCodes.SendHangmanWithName:
+                            HandleHangmanUpdate(split);
                             break;
                         default:
                             break;
@@ -147,14 +150,14 @@ namespace HangmanClient.Network
             });
         }
 
-        private void HandleCorrectLetter(string[] split)
+        private void HandleHangmanUpdate(string[] split)
         {
-            throw new NotImplementedException();
+            _game.Players[_game.PlayerIndexes[split[1]]].HangmanState = int.Parse(split[2]);
         }
 
-        private void HandleIncorrectLetter()
+        private void HandleIncorrectLetter(string[] split)
         {
-            throw new NotImplementedException();
+            _game.MainPlayer.HangmanState = int.Parse(split[1]);
         }
 
         private void HandleNewWord(string[] split)
@@ -172,7 +175,7 @@ namespace HangmanClient.Network
         private void HandleNewPlayer(string[] split)
         {
             Player player = new Player(split[1], 0);
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.Players.Add(player)));
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.AddPlayer(player)));
         }
 
         private void HandleJoinResponse(string[] split)
@@ -182,7 +185,7 @@ namespace HangmanClient.Network
                 if (split[i] != "")
                 {
                     Player player = new Player(split[i], 0);
-                    _game.Players.Add(player);
+                    _game.AddPlayer(player);
                 }
             }
             _waitHandle.Set();
