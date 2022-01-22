@@ -8,6 +8,7 @@ namespace HangmanClient.Stores
     public class Game : INotifyPropertyChanged
     {
         public IDictionary<string, int> PlayerIndexes;
+        public bool GameStarted;
         public event PropertyChangedEventHandler? PropertyChanged;
         private ObservableCollection<Player> _players;
         public ObservableCollection<Player> Players

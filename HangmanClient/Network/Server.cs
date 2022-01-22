@@ -105,7 +105,7 @@ namespace HangmanClient.Network
             var packet = PacketWriter.GetPacket((byte)OperationCodes.CheckLetter, letter);
             _tcpClient.Client.Send(packet);
         }
-
+    
         private void ReadMessages()
         {
             Task.Run(async () =>
@@ -142,9 +142,6 @@ namespace HangmanClient.Network
                         case OperationCodes.RoomCreationFailed:
                             HandleError("Room can not be created");
                             break;
-                        case OperationCodes.SendWord:
-                            HandleNewWord(split);
-                            break;
                         case OperationCodes.IncorrectLetter:
                             HandleIncorrectLetter(split);
                             break;
@@ -154,11 +151,32 @@ namespace HangmanClient.Network
                         case OperationCodes.SendHangmanWithName:
                             HandleHangmanUpdate(split);
                             break;
+                        case OperationCodes.StartGame:
+                            HandleStartGame(split);
+                            break;
+                        case OperationCodes.StartedWaiting:
+                            HandleNewWord(split);
+                            break;
+                        case OperationCodes.EndGame:
+                            HandleEndGame(split);
+                            break;
                         default:
                             break;
                     }
                 }
             });
+        }
+
+        private void HandleEndGame(string[] split)
+        {
+            _game.GameStarted = false;
+            _game.SecretWord = $"Game Over\n{split[1]} is the winner!";
+        }
+
+        private void HandleStartGame(string[] split)
+        {
+            _game.GameStarted = true;
+            _game.SecretWord = split[1];
         }
 
         private void HandleHangmanUpdate(string[] split)
@@ -171,6 +189,11 @@ namespace HangmanClient.Network
         {
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
            _game.MainPlayer.HangmanState = int.Parse(split[1])));
+            if (int.Parse(split[1]) == 6)
+            {
+                _game.GameStarted = false;
+                _game.SecretWord = "You lost :(";
+            }
         }
 
         private void HandleNewWord(string[] split)

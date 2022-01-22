@@ -1,11 +1,13 @@
 ﻿using HangmanClient.MVVM.ViewModel;
 using HangmanClient.Network;
+using HangmanClient.Stores;
 using System.ComponentModel;
 
 namespace HangmanClient.MVVM.Commands
 {
     public class SubmitCommand : CommandBase
     {
+        private readonly Game _game;
         private readonly GameViewModel _gameViewModel;
         private readonly Server _server;
 
@@ -14,6 +16,7 @@ namespace HangmanClient.MVVM.Commands
             _gameViewModel = gameViewModel;
             _gameViewModel.PropertyChanged += OnViewModelChanged;
             _server = server;
+            _game = Game.Instance;
         }
 
         public override void Execute(object? parameter)
@@ -26,7 +29,7 @@ namespace HangmanClient.MVVM.Commands
         {
             if (_gameViewModel.PlayerInput.Length == 1)
             {
-                return base.CanExecute(parameter);
+                return base.CanExecute(parameter) && _game.GameStarted;
             }
             return false;
         }
