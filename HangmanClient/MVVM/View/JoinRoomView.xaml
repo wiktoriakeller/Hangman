@@ -5,9 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HangmanClient.MVVM.View" xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:JoinRoomViewModel}"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="400">
+             d:DesignHeight="220" d:DesignWidth="400">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -38,6 +39,8 @@
             <Button Content="BACK" Width="150" Padding="5 5 5 5"
                     Command="{Binding BackCommand}"/>
         </StackPanel>
+
+        <local:ErrorMessageView Grid.Row="4"/>
 
     </Grid>
 </UserControl>

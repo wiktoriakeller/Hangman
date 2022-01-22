@@ -1,4 +1,5 @@
-﻿using HangmanClient.MVVM.ViewModel;
+﻿using HangmanClient.MVVM.Model;
+using HangmanClient.MVVM.ViewModel;
 using HangmanClient.Stores;
 using System;
 
@@ -13,6 +14,7 @@ namespace HangmanClient.MVVM.Commands
         {
             _navigationStore = navigationStore;
             _createViewModel = createViewModel;
+            Error.Instance.Message = "";
         }
 
         public override void Execute(object? parameter)

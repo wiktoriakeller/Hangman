@@ -24,8 +24,12 @@ namespace HangmanClient.Network
         CorrectLetter = 13,
         SendHangmanWithName = 14,
         PlayerLeft = 15,
-        EndGame = 16
-
+        EndGame = 16,
+        SendTime = 17,
+        StartGame = 18,
+        StartedWaiting = 19,
+        TimerStopped = 20,
+        RoomCreationFailed = 21
     }
 
     public class Server
@@ -33,13 +37,13 @@ namespace HangmanClient.Network
         private readonly TcpClient _tcpClient;
         private readonly EventWaitHandle _waitHandle = new AutoResetEvent(false);
         private readonly Game _game;
+        private readonly Error _error;
         private bool _operationFailed;
-        public string ErrorMessage { get; private set; }
 
         public Server()
         {
-            ErrorMessage = "";
             _game = Game.Instance;
+            _error = Error.Instance;
             _tcpClient = new TcpClient();
         }
 
@@ -64,7 +68,7 @@ namespace HangmanClient.Network
                 }
                 catch (Exception)
                 {
-                    System.Windows.MessageBox.Show("Server time out");
+                    MessageBox.Show("Server time out");
                 }
             }
         }
@@ -124,10 +128,19 @@ namespace HangmanClient.Network
                             HandleNewPlayer(split);
                             break;
                         case OperationCodes.RoomIsFull:
-                            HandleRoomFull();
+                            HandleError("This room is full!");
                             break;
                         case OperationCodes.NotUniqueName:
-                            HandleNotUniqueName();
+                            HandleError("This username is already in use");
+                            break;
+                        case OperationCodes.GameAlreadyStarted:
+                            HandleError("This game has already started");
+                            break;
+                        case OperationCodes.InvalidRoom:
+                            HandleError("This room number is invalid");
+                            break;
+                        case OperationCodes.RoomCreationFailed:
+                            HandleError("Room can not be created");
                             break;
                         case OperationCodes.SendWord:
                             HandleNewWord(split);
@@ -165,13 +178,6 @@ namespace HangmanClient.Network
             _game.SecretWord = split[1];
         }
 
-        private void HandleNotUniqueName()
-        {
-            _operationFailed = true;
-            ErrorMessage = "This username is already in use";
-            _waitHandle.Set();
-        }
-
         private void HandleNewPlayer(string[] split)
         {
             Player player = new Player(split[1], 0);
@@ -191,10 +197,10 @@ namespace HangmanClient.Network
             _waitHandle.Set();
         }
 
-        private void HandleRoomFull()
+        private void HandleError(string message)
         {
             _operationFailed = true;
-            ErrorMessage = "This room is full!";
+            _error.Message = message;
             _waitHandle.Set();
         }
 
