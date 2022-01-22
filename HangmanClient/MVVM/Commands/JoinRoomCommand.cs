@@ -21,19 +21,23 @@ namespace HangmanClient.MVVM.Commands
             _viewModel = viewModel;
             _viewModel.PropertyChanged += OnViewModelChanged;
             _navigationCommand = _viewModel.NavigateGameCommand;
-        }
+        }   
 
 
         public override bool CanExecute(object? parameter)
         {
-            return !string.IsNullOrEmpty(_viewModel.Username) &&
-                _viewModel.RoomId >= 0 &&
-                base.CanExecute(parameter);
+            if (_viewModel.RoomId != null)
+            {
+                return !string.IsNullOrEmpty(_viewModel.Username) &&
+                    _viewModel.RoomId >= 0 &&
+                    base.CanExecute(parameter);
+            }
+            return false;
         }
 
         public override void Execute(object? parameter)
         {
-            if (_server.JoinRoom(_viewModel.RoomId, _viewModel.Username))
+            if (_server.JoinRoom(_viewModel.RoomId.GetValueOrDefault(), _viewModel.Username))
             {
                 _navigationCommand.Execute(parameter);
             }

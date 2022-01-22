@@ -12,8 +12,8 @@ namespace HangmanClient.MVVM.ViewModel
 {
     public class JoinRoomViewModel : ViewModelBase
     {
-        private int _roomId;
-        public int RoomId
+        private int? _roomId;
+        public int? RoomId
         {
             get { return _roomId; }
             set 
