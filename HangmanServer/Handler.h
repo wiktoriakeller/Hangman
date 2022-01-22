@@ -45,7 +45,8 @@ enum HandleResult {
 	NoHandleResError,
 	DeletePlayer,
 	DeleteRoom,
-	DeleteServer
+	DeleteServer,
+	EndGameInRoom
 };
 
 enum ParseMessegeError {

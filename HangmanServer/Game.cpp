@@ -68,7 +68,8 @@ void Game::DeletePlayer(int id) {
 }
 
 void Game::DeletePlayerFromRoom(int roomId, std::string name) {
-	_roomsMap[roomId]->DeletePlayer(name);
+	if(_roomsMap.find(roomId) != _roomsMap.end())
+		_roomsMap[roomId]->DeletePlayer(name);
 }
 
 void Game::DeleteRoom(int id) {
@@ -109,4 +110,12 @@ bool Game::DoesRoomExist(int id) {
 	}
 
 	return false;
+}
+
+void Game::DeleteRoomAfterGame(int roomId) {
+	if (_roomsMap.find(roomId) != _roomsMap.end()) {
+		_roomsMap[roomId]->Close();
+		_roomsMap[roomId]->ClearRoom();
+		_roomsMap.erase(roomId);
+	}
 }

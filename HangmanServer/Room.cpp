@@ -8,6 +8,7 @@ Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) {
 	_timerRegistered = false;
 	_timerCreated = false;
 	_gameStarted = false;
+	_gameTime = 30;
 }
 
 void Room::Close() {
@@ -27,21 +28,32 @@ void Room::Close() {
 }
 
 std::tuple<HandleResult, int, int, std::string> Room::Handle(uint events) {
+	bool setTimer = false;
 	if (events & EPOLLIN) {
 		uint64_t buff;
 		read(_timerFd, &buff, sizeof(uint64_t));
-		if (this->GetNumberOfPlayers() >= 2) {
+		if (this->GetNumberOfPlayers() >= 2 && !_gameStarted) {
 			std::string message;
 			message += (uint8_t)OperationCodes::StartGame;
-			message += " Game started";
+			message += " ";
+			message += GetHiddenSecretWord();
 			SendToAll(message);
 			_gameStarted = true;
+			setTimer = true;
+		}
+		else if (_gameStarted) {
+			SendWinnder();
+			return std::make_tuple(HandleResult::EndGameInRoom, _roomId, 0, "");
 		}
 	}
 
 	if (events & ~EPOLLIN) {
 		Close();
 		return std::make_tuple(HandleResult::DeleteRoom, _roomId, 0, "");
+	}
+
+	if (setTimer) {
+		StartTimer(_gameTime);
 	}
 
 	return std::make_tuple(HandleResult::NoHandleResError, 0, 0, "");
@@ -154,8 +166,48 @@ void Room::ResetTimer() {
 	SendToAll(message);
 }
 
-bool Room::GetGameStarted() {
+bool Room::GameStarted() {
 	return _gameStarted;
+}
+
+std::string Room::GetHiddenSecretWord() {
+	std::string word;
+	for (size_t i = 0; i < _secretWord.size(); i++) {
+		if (_secretWord[i] != ' ') {
+			word += "*";
+		}
+		else {
+			word += "_";
+		}
+	}
+
+	return word;
+}
+
+std::string Room::GetWinnerPlayer() {
+	int max = -1;
+	std::string name;
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		if (it->second->GetPoints() > max) {
+			max = it->second->GetPoints();
+			name = it->first;
+		}
+	}
+
+	return name;
+}
+
+void Room::ClearRoom() {
+	_playersInRoom.clear();
+}
+
+void Room::SendWinnder() {
+	std::string message;
+	std::string winner = GetWinnerPlayer();
+	message += (uint8_t)OperationCodes::EndGame;
+	message += " ";
+	message += winner;
+	SendToAll(message);
 }
 
 int Room::GetNumberOfPlayers() {

@@ -26,6 +26,7 @@ public:
 	void SetServer(std::shared_ptr<Handler> server);
 	void EndGame();
 	bool DoesRoomExist(int id);
+	void DeleteRoomAfterGame(int roomId);
 
 private:
 	const int LOWER_BOUND_ROOM = 0;

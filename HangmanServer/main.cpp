@@ -47,7 +47,10 @@ int main() {
 				std::string name = std::get<3>(result);
 
 				Game::Instance().DeletePlayer(id);
-				Game::Instance().DeletePlayerFromRoom(roomId, name);
+				if (roomId >= 0) {
+					Game::Instance().DeletePlayerFromRoom(roomId, name);
+				}
+
 				printf("Player closed\n");
 
 				if (roomId >= 0) {
@@ -56,8 +59,12 @@ int main() {
 						if (room->GetNumberOfPlayers() == 0) {
 							Game::Instance().DeleteRoom(roomId);
 						}
-						else if (room->GetNumberOfPlayers() == 1) {
+						else if (room->GetNumberOfPlayers() == 1 && !room->GameStarted()) {
 							room->ResetTimer();
+						}
+						else if (room->GetNumberOfPlayers() == 1 && room->GameStarted()) {
+							room->SendWinnder();
+							Game::Instance().DeleteRoomAfterGame(roomId);
 						}
 					}
 				}
@@ -65,6 +72,10 @@ int main() {
 			else if (std::get<0>(result) == HandleResult::DeleteRoom) {
 				int roomId = std::get<1>(result);
 				Game::Instance().DeleteRoom(roomId);
+			}
+			else if (std::get<0>(result) == HandleResult::EndGameInRoom) {
+				int roomId = std::get<1>(result);
+				Game::Instance().DeleteRoomAfterGame(roomId);
 			}
 			else if (std::get<0>(result) == HandleResult::DeleteServer) {
 				break;

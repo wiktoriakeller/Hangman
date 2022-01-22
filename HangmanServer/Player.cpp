@@ -134,6 +134,10 @@ void Player::PrepereToSend(std::string message) {
 	}
 }
 
+int Player::GetPoints() {
+	return _points;
+}
+
 ParseMessegeError Player::HandleOperation(const std::vector<std::string>& divided) {
 	//OperationCodes operationType = (OperationCodes)divided[0][0];
 	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
@@ -194,7 +198,8 @@ ParseMessegeError Player::SendNewRoomId(const std::vector<std::string>& divided)
 		Game::Instance().AddRoom(generatedRoomId, _epollFd);
 		std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
 		room->AddPlayer(Game::Instance().GetPlayer(_id), name);
-		SetCurrentWord(room->GetSecretWord());
+		_currentWord = room->GetHiddenSecretWord();
+		_points = 0;
 
 		toSend += (uint8_t)OperationCodes::SendNewRoomId;
 		toSend += " ";
@@ -231,7 +236,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 		return ParseMessegeError::NoMsgError;
 	}
 
-	if (room->GetGameStarted()) {
+	if (room->GameStarted()) {
 		toSend += (uint8_t)OperationCodes::GameAlreadyStarted;
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
@@ -239,6 +244,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 
 	SetName(name);
 	SetRoomId(roomId);
+	_points = 0;
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
 	toSend += (uint8_t)OperationCodes::JoinRoom;
@@ -250,7 +256,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	messageToAll += " ";
 	messageToAll += name;
 
-	SetCurrentWord(room->GetSecretWord());
+	_currentWord = room->GetHiddenSecretWord();
 	room->SendToAllBut(messageToAll, name);
 	PrepereToSend(toSend);
 
@@ -283,6 +289,7 @@ ParseMessegeError Player::CheckLetter(char letter) {
 		toSend += (uint8_t)OperationCodes::CorrectLetter;
 		toSend += " ";
 		toSend += _currentWord;
+		_points++;
 		PrepereToSend(toSend);
 	}
 	else {
@@ -302,16 +309,4 @@ ParseMessegeError Player::CheckLetter(char letter) {
 	}
 
 	return ParseMessegeError::NoMsgError;
-}
-
-void Player::SetCurrentWord(std::string secretWord) {
-	_currentWord.clear();
-	for (size_t i = 0; i < secretWord.size(); i++) {
-		if (secretWord[i] != ' ') {
-			_currentWord += "*";
-		}
-		else {
-			_currentWord += "_";
-		}
-	}
 }

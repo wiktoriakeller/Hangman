@@ -11,6 +11,7 @@ public:
 	std::string GetName();
 	void SetRoomId(int id);
 	void PrepereToSend(std::string message);
+	int GetPoints();
 
 private:
 	const size_t BUFFER_SIZE = 128;
@@ -20,6 +21,7 @@ private:
 	int _epollFd;
 	int _hangmanState;
 	bool _closedSocket;
+	int _points;
 	std::string _currentWord;
 	std::string _name;
 	std::vector<char> currentMessagesToRead;
@@ -28,7 +30,6 @@ private:
 	void WaitForWrite(bool epollout);
 	ParseMessegeError HandleOperation(const std::vector<std::string>& divided);
 	ParseMessegeError ParseMessage(std::string message);	
-	void SetCurrentWord(std::string secretWord);
 
 	//operation codes handlers
 	ParseMessegeError SendNewRoomId(const std::vector<std::string>& divided);
