@@ -31,11 +31,11 @@ namespace HangmanClient.Stores
         private string secretWord;
         public string SecretWord
         {
-            get => secretWord; set
+            get => secretWord;
+            set
             {
                 secretWord = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SecretWord)));
-
             }
         }
         private Game()

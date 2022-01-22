@@ -19,25 +19,25 @@
 #include <tuple>
 
 enum OperationCodes {
-	SendNewRoomId = 1,
-	JoinRoom = 2,
-	NotUniqueName = 3,
-	InvalidRoom = 4,
-	GameAlreadyStarted = 5,
-	SendPlayerName = 6,
-	SendAllPlayerNames = 7,
-	RoomIsFull = 8,
-	SendWord = 9,
-	CheckLetter = 11,
-	IncorrectLetter = 12,
-	CorrectLetter = 13,
-	SendHangmanWithName = 14,
-	EndGame = 16,
-	StartGame = 18,
-	StartedWaiting = 19,
-	TimerStopped = 20,
-	RoomCreationFailed = 21,
-	NotInARoom = 22
+	SendNewRoomId = 48,
+	JoinRoom = 49,
+	NotUniqueName = 50,
+	InvalidRoom = 51,
+	GameAlreadyStarted = 52,
+	SendPlayerName = 53,
+	SendAllPlayerNames = 54,
+	RoomIsFull = 55,
+	SendWord = 56,
+	CheckLetter = 57,
+	IncorrectLetter = 58,
+	CorrectLetter = 59,
+	SendHangmanWithName = 60,
+	EndGame = 61,
+	StartGame = 62,
+	StartedWaiting = 63,
+	TimerStopped = 64,
+	RoomCreationFailed = 65,
+	NotInARoom = 66
 };
 
 enum HandleResult {

@@ -13,15 +13,14 @@ namespace HangmanClient.Network
             streamReader = new StreamReader(input);
         }
 
-        public async Task<string> GetMessageAsync()
+        public async Task<string?> GetMessageAsync()
         {
             var msg = await streamReader.ReadLineAsync();
             if (msg != null)
             {
                 Debug.WriteLine(msg);
-                return msg;
             }
-            return "";
+            return msg;
         }
     }
 }

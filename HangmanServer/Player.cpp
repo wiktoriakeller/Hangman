@@ -171,8 +171,8 @@ std::string Player::GetCurrentWord() {
 }
 
 ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divided) {
-	//OperationCodes operationType = (OperationCodes)divided[0][0];
-	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
+	OperationCodes operationType = (OperationCodes)divided[0][0];
+	//OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
 	ParseMessegeStatus error;
 
 	switch (operationType)
@@ -297,7 +297,7 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 		message += (uint8_t)OperationCodes::StartedWaiting;
 		message += " StartedWaiting";
 		room->SendToAll(message);
-		error = room->StartTimer(25);
+		error = room->StartTimer(20);
 	}
 
 	return error;

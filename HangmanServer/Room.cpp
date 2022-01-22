@@ -7,7 +7,7 @@ Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) {
 	_timerRegistered = false;
 	_timerCreated = false;
 	_gameStarted = false;
-	_gameTime = 90;
+	_gameTime = 120;
 }
 
 void Room::Close() {
