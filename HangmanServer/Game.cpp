@@ -25,9 +25,8 @@ std::string Game::GetRandomWord() {
 
 int Game::GetFreeRoomId() {
 	for (int i = LOWER_BOUND_ROOM; i <= UPPER_BOUND_ROOM; i++) {
-		if (_roomsMap.find(i) == _roomsMap.end()) {
+		if (_roomsMap.find(i) == _roomsMap.end())
 			return i;
-		}
 	}
 
 	return -1;
@@ -35,22 +34,20 @@ int Game::GetFreeRoomId() {
 
 int Game::GetFreePlayerId() {
 	for (int i = LOWER_BOUND_PLAYER; i <= UPPER_BOUND_PLAYER; i++) {
-		if (_playersMap.find(i) == _playersMap.end()) {
+		if (_playersMap.find(i) == _playersMap.end())
 			return i;
-		}
 	}
 
 	return -1;
 }
 
-void Game::AddRoom(int id) {
-	_roomsMap[id] = std::make_shared<Room>(id);
+void Game::AddRoom(int id, int epollFd) {
+	_roomsMap[id] = std::make_shared<Room>(id, epollFd);
 }
 
 std::shared_ptr<Room> Game::GetRoom(int id) {
-	if (_roomsMap.find(id) != _roomsMap.end()) {
+	if (_roomsMap.find(id) != _roomsMap.end())
 		return _roomsMap[id];
-	}
 
 	return nullptr;
 }
@@ -60,9 +57,8 @@ void Game::AddPlayer(std::shared_ptr<Player> newPlayer, int id) {
 }
 
 std::shared_ptr<Player> Game::GetPlayer(int id) {
-	if (_playersMap.find(id) != _playersMap.end()) {
+	if (_playersMap.find(id) != _playersMap.end())
 		return _playersMap[id];
-	}
 
 	return nullptr;
 }
@@ -71,20 +67,31 @@ void Game::DeletePlayer(int id) {
 	_playersMap.erase(id);
 }
 
-void Game::DeleteRoom(int id) {
-	_roomsMap[id]->DeleteAllPlayersInRoom();
-	_roomsMap.erase(id);
+void Game::DeletePlayerFromRoom(int roomId, std::string name) {
+	if(_roomsMap.find(roomId) != _roomsMap.end())
+		_roomsMap[roomId]->DeletePlayer(name);
 }
 
-void Game::DeleteAllPlayers() {
-	printf("Deleting all players\n");
+void Game::DeleteRoom(int id) {
+	if (_roomsMap.find(id) != _roomsMap.end()) {
+		_roomsMap[id]->Close();
+		_roomsMap[id]->DeleteAllPlayersInRoom();
+		_roomsMap.erase(id);
+	}
+}
+
+void Game::DeleteAll() {
+	printf("Deleting all players and rooms\n");
+	for (auto it = _roomsMap.begin(); it != _roomsMap.end(); it++)
+		it->second->Close();
+
 	for (auto it = _playersMap.begin(); it != _playersMap.end(); it++)
-		it->second->CloseSocket();
+		it->second->Close();
 
 	_playersMap.clear();
 	_roomsMap.clear();
 
-	printf("All players deleted\n");
+	printf("All players and rooms deleted\n");
 }
 
 void Game::SetServer(std::shared_ptr<Handler> server) {
@@ -92,7 +99,7 @@ void Game::SetServer(std::shared_ptr<Handler> server) {
 }
 
 void Game::EndGame() {
-	DeleteAllPlayers();
+	DeleteAll();
 	_server->Close();
 }
 

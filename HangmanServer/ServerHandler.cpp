@@ -2,8 +2,7 @@
 #include "Player.h"
 #include "Game.h"
 
-ServerHandler::ServerHandler(int epollFd) {
-	_epollFd = epollFd;
+ServerHandler::ServerHandler(int epollFd) : _epollFd(epollFd) {
 	sockaddr_in serverAddr{};
 
 	serverAddr.sin_family = AF_INET;
@@ -14,7 +13,10 @@ ServerHandler::ServerHandler(int epollFd) {
 	if (_serverSocket == -1)
 		error(1, errno, "Socket creation failed");
 
-	setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	int res = setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+
+	if (res)
+		error(1, errno, "Setsockopt failed");
 
 	if (bind(_serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) != 0)
 		error(1, errno, "Bind failed");
@@ -29,24 +31,28 @@ void ServerHandler::Close() {
 	printf("Server closed\n");
 }
 
-HandleResult ServerHandler::Handle(uint events) {
+std::tuple<HandleResult, int, int, std::string> ServerHandler::Handle(uint events) {
 	if (events & EPOLLIN) {
 		sockaddr_in clientAddr{};
 		socklen_t clientAddrSize;
 		clientAddrSize = sizeof(clientAddr);
 		int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
 
-		int playerId = Game::Instance().GetFreePlayerId();
-		std::shared_ptr<Player> player = std::make_shared<Player>(clientSocket, playerId, _epollFd);
-		Game::Instance().AddPlayer(player, playerId);
-		printf("Added new player\n");
+		if (clientSocket != -1) {
+			int playerId = Game::Instance().GetFreePlayerId();
+			if (playerId != -1) {
+				std::shared_ptr<Player> player = std::make_shared<Player>(clientSocket, playerId, _epollFd);
+				Game::Instance().AddPlayer(player, playerId);
+				printf("Added new player\n");
+			}
+		}
 	}
 
 	if (events & ~EPOLLIN) {
-		return HandleResult::DeleteServer;
+		return std::make_tuple(HandleResult::DeleteServer, 0, 0, "");
 	}
 
-	return HandleResult::None;
+	return std::make_tuple(HandleResult::NoHandleResError, 0, 0, "");;
 }
 
 int ServerHandler::GetServerSocket() {

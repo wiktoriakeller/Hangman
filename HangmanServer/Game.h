@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Room.h"
 #include <map>
 #include <vector>
@@ -16,13 +15,14 @@ public:
 	std::string GetRandomWord();
 	int GetFreeRoomId();
 	int GetFreePlayerId();
-	void AddRoom(int id);
+	void AddRoom(int id, int epollFd);
 	std::shared_ptr<Room> GetRoom(int id);
 	void AddPlayer(std::shared_ptr<Player> newPlayer, int id);
 	std::shared_ptr<Player> GetPlayer(int id);
 	void DeleteRoom(int id);
 	void DeletePlayer(int id);
-	void DeleteAllPlayers();
+	void DeletePlayerFromRoom(int roomId, std::string name);
+	void DeleteAll();
 	void SetServer(std::shared_ptr<Handler> server);
 	void EndGame();
 	bool DoesRoomExist(int id);

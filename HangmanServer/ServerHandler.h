@@ -5,7 +5,7 @@ class ServerHandler : public Handler {
 public:
 	ServerHandler(int epollFd);
 	void Close() override;
-	HandleResult Handle(uint events) override;
+	std::tuple<HandleResult, int, int, std::string> Handle(uint events) override;
 	int GetServerSocket();
 
 private:

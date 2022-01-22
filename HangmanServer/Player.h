@@ -1,41 +1,38 @@
 #pragma once
-
 #include "Handler.h"
 
 class Player : public Handler {
 public:
 	Player(int socket, int id, int epollFd);
 	void Close() override;
-	HandleResult Handle(uint events) override;
-	void SetId(const int& id);
+	std::tuple<HandleResult, int, int, std::string> Handle(uint events) override;
 	int GetId();
 	void SetName(const std::string& name);
 	std::string GetName();
 	void SetRoomId(int id);
-	int GetRoomId();
-	void CloseSocket();
 	void PrepereToSend(std::string message);
 
 private:
-	const size_t BUFFER_SIZE = 64;
+	const size_t BUFFER_SIZE = 128;
 	int _socket;
 	int _id;
 	int _roomId;
 	int _epollFd;
 	int _hangmanState;
+	bool _closedSocket;
 	std::string _currentWord;
 	std::string _name;
 	std::vector<char> currentMessagesToRead;
 	std::vector<std::string> currentMessagesToSend;
 
 	void WaitForWrite(bool epollout);
-	void HandleOperation(const std::vector<std::string>& divided);
-	void ParseMessage(std::string message);	
+	ParseMessegeError HandleOperation(const std::vector<std::string>& divided);
+	ParseMessegeError ParseMessage(std::string message);	
 	void SetCurrentWord(std::string secretWord);
 
 	//operation codes handlers
-	void SendNewRoomId(const std::vector<std::string>& divided);
-	void JoinRoom(const std::vector<std::string>& divided);
-	void SendWord();
-	void CheckLetter(char letter);
+	ParseMessegeError SendNewRoomId(const std::vector<std::string>& divided);
+	ParseMessegeError JoinRoom(const std::vector<std::string>& divided);
+	ParseMessegeError SendWord();
+	ParseMessegeError CheckLetter(char letter);
 };

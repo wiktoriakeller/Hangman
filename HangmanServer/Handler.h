@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <map>
 #include <vector>
+#include <tuple>
 
 enum OperationCodes {
 	SendNewRoomId = 1,
@@ -32,17 +33,27 @@ enum OperationCodes {
 	CorrectLetter = 13,
 	SendHangmanWithName = 14,
 	PlayerLeft = 15,
-	EndGame = 16
+	EndGame = 16,
+	SendTime = 17,
+	StartGame = 18,
+	StartedWaiting = 19,
+	RoomCreationFailed = 20
 };
 
 enum HandleResult {
-	None,
+	NoHandleResError,
 	DeletePlayer,
+	DeleteRoom,
 	DeleteServer
+};
+
+enum ParseMessegeError {
+	NoMsgError,
+	TimerFailed
 };
 
 class Handler {
 public:
 	virtual void Close() = 0;
-	virtual HandleResult Handle(uint events) = 0;
+	virtual std::tuple<HandleResult, int, int, std::string> Handle(uint events) = 0;
 };

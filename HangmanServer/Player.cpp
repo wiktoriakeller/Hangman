@@ -1,34 +1,19 @@
 #include "Player.h"
 #include "Game.h"
 
-Player::Player(int socket, int id, int epollFd) {
-	_socket = socket;
-	_id = id;
-	_roomId = -1;
-	_epollFd = epollFd;
-	_hangmanState = 0;
+Player::Player(int socket, int id, int epollFd) : _socket(socket), _id(id), _roomId(-1), _epollFd(epollFd), _hangmanState(0), _closedSocket(false) {
 	epoll_event ee{ EPOLLIN | EPOLLRDHUP, {.ptr = this} };
 	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _socket, &ee);
 }
 
 void Player::Close() {
-	CloseSocket();
-	Game::Instance().DeletePlayer(_id);
-	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
-	if(room != nullptr)
-		room->DeletePlayer(_name);
-	printf("Player closed\n");
-}
-
-void Player::CloseSocket() {
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, _socket, nullptr);
-	shutdown(_socket, SHUT_RDWR);
-	close(_socket);
-	printf("Player socket closed\n");
-}
-
-void Player::SetId(const int& id) {
-	_id = id;
+	if (!_closedSocket) {
+		_closedSocket = true;
+		epoll_ctl(_epollFd, EPOLL_CTL_DEL, _socket, nullptr);
+		shutdown(_socket, SHUT_RDWR);
+		close(_socket);
+		printf("Player socket closed\n");
+	}
 }
 
 int Player::GetId() {
@@ -47,11 +32,9 @@ void Player::SetRoomId(int id) {
 	_roomId = id;
 }
 
-int Player::GetRoomId() {
-	return _roomId;
-}
+std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
+	ParseMessegeError error = ParseMessegeError::NoMsgError;
 
-HandleResult Player::Handle(uint events) {
 	if (events & EPOLLIN) {
 		char buffer[BUFFER_SIZE];
 		memset(buffer, 0x00, BUFFER_SIZE);
@@ -65,10 +48,10 @@ HandleResult Player::Handle(uint events) {
 			currentMessagesToRead.insert(currentMessagesToRead.end(), buffer, buffer + count);
 			std::string tmpMessage;
 
-			for (long unsigned int i = 0; i < currentMessagesToRead.size(); i++) {
+			for (size_t i = 0; i < currentMessagesToRead.size(); i++) {
 				if (currentMessagesToRead[i] == '\n') {
 					tmpMessage += currentMessagesToRead[i];
-					ParseMessage(tmpMessage);
+					error = ParseMessage(tmpMessage);
 					tmpMessage.clear();
 				}
 				else {
@@ -85,12 +68,13 @@ HandleResult Player::Handle(uint events) {
 	}
 
 	if (events & EPOLLOUT) {
+		size_t i = 0;
 		bool dataToSend = currentMessagesToSend.size() > 0 ? true : false;
+
 		while (dataToSend) {
-			int i = currentMessagesToSend.size() - 1;
 			const char* data = currentMessagesToSend[i].c_str();
 			size_t size = currentMessagesToSend[i].size();
-			int sent = send(_socket, data, size, MSG_DONTWAIT);
+			ssize_t sent = send(_socket, data, size, MSG_DONTWAIT);
 
 			if (sent == -1) {
 				if (errno != EWOULDBLOCK && errno != EAGAIN) {
@@ -103,23 +87,32 @@ HandleResult Player::Handle(uint events) {
 				currentMessagesToSend[i] = currentMessagesToSend[i].substr(sent);
 			}
 			else {
-				currentMessagesToSend.pop_back();
+				i++;
 			}
 
-			if (currentMessagesToSend.size() == 0)
+			if (i == currentMessagesToSend.size())
 				dataToSend = false;
 		}
 
-		if (currentMessagesToSend.size() == 0)
+		if (i == currentMessagesToSend.size()) {
 			WaitForWrite(false);
+			currentMessagesToSend.clear();
+		}
+		else {
+			currentMessagesToSend.erase(std::next(currentMessagesToSend.begin(), 0), std::next(currentMessagesToSend.begin(), i));
+		}
+	}
+
+	if (error == ParseMessegeError::TimerFailed) {
+		return std::make_tuple(HandleResult::DeleteRoom, _roomId, 0, "");
 	}
 
 	if (events & ~(EPOLLIN | EPOLLOUT)) {
 		Close();
-		return HandleResult::DeletePlayer;
+		return std::make_tuple(HandleResult::DeletePlayer, _id, _roomId, _name);
 	}
 
-	return HandleResult::None;
+	return std::make_tuple(HandleResult::NoHandleResError, 0, 0, "");
 }
 
 void Player::WaitForWrite(bool epollout) {
@@ -141,30 +134,33 @@ void Player::PrepereToSend(std::string message) {
 	}
 }
 
-void Player::HandleOperation(const std::vector<std::string>& divided) {
+ParseMessegeError Player::HandleOperation(const std::vector<std::string>& divided) {
 	//OperationCodes operationType = (OperationCodes)divided[0][0];
 	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
+	ParseMessegeError error;
 
 	switch (operationType)
 	{
 	case OperationCodes::SendNewRoomId:
-		SendNewRoomId(divided);
+		error = SendNewRoomId(divided);
 		break;
 	case OperationCodes::JoinRoom:
-		JoinRoom(divided);
+		error = JoinRoom(divided);
 		break;
 	case OperationCodes::SendWord:
-		SendWord();
+		error = SendWord();
 		break;
 	case OperationCodes::CheckLetter:
-		CheckLetter(divided[1][0]);
+		error = CheckLetter(divided[1][0]);
 		break;
 	default:
 		break;
 	}
+
+	return error;
 }
 
-void Player::ParseMessage(std::string message) {
+ParseMessegeError Player::ParseMessage(std::string message) {
 	std::vector<std::string> divided;
 	std::string messagePart;
 
@@ -181,36 +177,44 @@ void Player::ParseMessage(std::string message) {
 		}
 	}
 
-	HandleOperation(divided);
+	ParseMessegeError error = HandleOperation(divided);
+	return error;
 }
 
-void Player::SendNewRoomId(const std::vector<std::string>& divided) {
+ParseMessegeError Player::SendNewRoomId(const std::vector<std::string>& divided) {
 	std::string toSend;
 	std::string name = divided[1];
 	int generatedRoomId = Game::Instance().GetFreeRoomId();
-	SetName(name);
-	SetRoomId(generatedRoomId);
-	Game::Instance().AddRoom(generatedRoomId);
-	std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
-	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
-	SetCurrentWord(room->GetSecretWord());
+	if (generatedRoomId == -1) {
+		toSend += (uint8_t)OperationCodes::RoomCreationFailed;
+	}
+	else {
+		SetName(name);
+		SetRoomId(generatedRoomId);
+		Game::Instance().AddRoom(generatedRoomId, _epollFd);
+		std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
+		room->AddPlayer(Game::Instance().GetPlayer(_id), name);
+		SetCurrentWord(room->GetSecretWord());
 
-	toSend += (uint8_t)OperationCodes::SendNewRoomId;
-	toSend += " ";
-	toSend += std::to_string(generatedRoomId);
+		toSend += (uint8_t)OperationCodes::SendNewRoomId;
+		toSend += " ";
+		toSend += std::to_string(generatedRoomId);
+	}
 
 	PrepereToSend(toSend);
+	return ParseMessegeError::NoMsgError;
 }
 
-void Player::JoinRoom(const std::vector<std::string>& divided) {
+ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	std::string toSend;
 	int roomId = stoi(divided[1]);
 	std::string name = divided[2];
+	ParseMessegeError error = ParseMessegeError::NoMsgError;
 	
 	if (!Game::Instance().DoesRoomExist(roomId)) {
 		toSend += (uint8_t)OperationCodes::InvalidRoom;
 		PrepereToSend(toSend);
-		return;
+		return ParseMessegeError::NoMsgError;
 	}
 	
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
@@ -218,13 +222,13 @@ void Player::JoinRoom(const std::vector<std::string>& divided) {
 	if (!room->IsNameUnique(name)) {
 		toSend += (uint8_t)OperationCodes::NotUniqueName;
 		PrepereToSend(toSend);
-		return;
+		return ParseMessegeError::NoMsgError;
 	}
 
-	if (room->IsRoomFull()) {
+	if (room->GetNumberOfPlayers() == Room::ROOM_MAX_SIZE) {
 		toSend += (uint8_t)OperationCodes::RoomIsFull;
 		PrepereToSend(toSend);
-		return;
+		return ParseMessegeError::NoMsgError;
 	}
 
 	SetName(name);
@@ -243,20 +247,30 @@ void Player::JoinRoom(const std::vector<std::string>& divided) {
 	SetCurrentWord(room->GetSecretWord());
 	room->SendToAllBut(messageToAll, name);
 	PrepereToSend(toSend);
+
+	if (room->GetNumberOfPlayers() == 2) {
+		std::string message;
+		message += (uint8_t)OperationCodes::StartedWaiting;
+		message += " Started waiting";
+		room->SendToAll(message);
+		error = room->StartTimer(10);
+	}
+
+	return error;
 }
 
-void Player::SendWord() {
+ParseMessegeError Player::SendWord() {
 	std::string toSend;
 	toSend += (uint8_t)OperationCodes::SendWord;
 	toSend += " ";
 	toSend += _currentWord;
 	PrepereToSend(toSend);
+	return ParseMessegeError::NoMsgError;
 }
 
-void Player::CheckLetter(char letter) {
+ParseMessegeError Player::CheckLetter(char letter) {
 	std::string toSend;
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
-	std::string secretWord = room->GetSecretWord();
 	
 	if (room->IsLetterInWord(letter)) {
 		room->InsertCorrectLetter(letter, _currentWord);
@@ -278,14 +292,15 @@ void Player::CheckLetter(char letter) {
 		messageToAll += _name;
 		messageToAll += " ";
 		messageToAll += std::to_string(_hangmanState);
-		std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
 		room->SendToAllBut(messageToAll, _name);
 	}
+
+	return ParseMessegeError::NoMsgError;
 }
 
 void Player::SetCurrentWord(std::string secretWord) {
 	_currentWord.clear();
-	for (int i = 0; i < secretWord.size(); i++) {
+	for (size_t i = 0; i < secretWord.size(); i++) {
 		if (secretWord[i] != ' ') {
 			_currentWord += "*";
 		}

@@ -34,15 +34,34 @@ int main() {
 
 	while (true) {
 		if (-1 == epoll_wait(epollFd, &epollEvent, 1, -1)) {
-			error(1, errno, "Epoll failed");
-			printf("Epoll failed");
+			error(0, errno, "Epoll wait failed");
 			break;
 		}
 
 		if (epollEvent.data.ptr != nullptr) {
-			HandleResult result = (static_cast<Handler*>(epollEvent.data.ptr))->Handle(epollEvent.events);
+			auto result = (static_cast<Handler*>(epollEvent.data.ptr))->Handle(epollEvent.events);
 			
-			if (result == HandleResult::DeleteServer) {
+			if (std::get<0>(result) == HandleResult::DeletePlayer) {
+				int id = std::get<1>(result);
+				int roomId = std::get<2>(result);
+				std::string name = std::get<3>(result);
+
+				Game::Instance().DeletePlayer(id);
+				Game::Instance().DeletePlayerFromRoom(roomId, name);
+				printf("Player closed\n");
+
+				std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
+				if (room != nullptr) {
+					if (room->GetNumberOfPlayers() == 0)
+						room->Close();
+					Game::Instance().DeleteRoom(roomId);
+				}
+			}
+			else if (std::get<0>(result) == HandleResult::DeleteRoom) {
+				int roomId = std::get<1>(result);
+				Game::Instance().DeleteRoom(roomId);
+			}
+			else if (std::get<0>(result) == HandleResult::DeleteServer) {
 				break;
 			}
 		}
