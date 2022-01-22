@@ -2,10 +2,6 @@
 using HangmanClient.Network;
 using HangmanClient.Stores;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace HangmanClient.MVVM.ViewModel
@@ -16,8 +12,8 @@ namespace HangmanClient.MVVM.ViewModel
         public int? RoomId
         {
             get { return _roomId; }
-            set 
-            { 
+            set
+            {
                 _roomId = value;
                 OnPropertyChanged(nameof(RoomId));
             }

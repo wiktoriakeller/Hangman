@@ -1,12 +1,6 @@
 ﻿using HangmanClient.MVVM.ViewModel;
 using HangmanClient.Network;
-using HangmanClient.Stores;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HangmanClient.MVVM.Commands
 {
@@ -21,7 +15,7 @@ namespace HangmanClient.MVVM.Commands
             _viewModel = viewModel;
             _viewModel.PropertyChanged += OnViewModelChanged;
             _navigationCommand = _viewModel.NavigateGameCommand;
-        }   
+        }
 
 
         public override bool CanExecute(object? parameter)

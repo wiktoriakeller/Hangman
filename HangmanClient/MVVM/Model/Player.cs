@@ -10,7 +10,8 @@ namespace HangmanClient.MVVM.Model
         private string username;
         private int state;
 
-        public string Username {
+        public string Username
+        {
             get { return username; }
             set
             {
@@ -18,7 +19,8 @@ namespace HangmanClient.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public int HangmanState {
+        public int HangmanState
+        {
             get { return state; }
             set
             {
@@ -27,11 +29,12 @@ namespace HangmanClient.MVVM.Model
                 OnPropertyChanged(nameof(HangmanImage));
             }
         }
-        public string HangmanImage { 
-            get 
+        public string HangmanImage
+        {
+            get
             {
-                return Path.GetFullPath(@"Images\" + state.ToString() + ".bmp"); 
-            } 
+                return Path.GetFullPath(@"Images\" + state.ToString() + ".bmp");
+            }
         }
 
         public Player(string username, int hangmanState)

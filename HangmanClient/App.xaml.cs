@@ -1,12 +1,7 @@
 ﻿using HangmanClient.MVVM.ViewModel;
 using HangmanClient.Network;
 using HangmanClient.Stores;
-using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace HangmanClient
@@ -66,7 +61,8 @@ namespace HangmanClient
         }
 
         private MainMenuViewModel CreateMainMenuViewModel()
-        {   if (_navigationStore.mainMenuViewModel == null)
+        {
+            if (_navigationStore.mainMenuViewModel == null)
             {
                 return new MainMenuViewModel(_navigationStore, CreateJoinRoomViewModel, CreateCreateRoomViewModel);
             }

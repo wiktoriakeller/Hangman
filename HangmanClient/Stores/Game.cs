@@ -1,10 +1,7 @@
 ﻿using HangmanClient.MVVM.Model;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace HangmanClient.Stores
 {
@@ -31,7 +28,9 @@ namespace HangmanClient.Stores
             }
         }
         private string secretWord;
-        public string SecretWord { get => secretWord; set
+        public string SecretWord
+        {
+            get => secretWord; set
             {
                 secretWord = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SecretWord)));

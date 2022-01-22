@@ -1,8 +1,5 @@
 ﻿using HangmanClient.MVVM.Commands;
-using HangmanClient.MVVM.Model;
 using HangmanClient.Network;
-using HangmanClient.Stores;
-using System;
 using System.Windows.Input;
 
 namespace HangmanClient.MVVM.ViewModel
@@ -14,8 +11,8 @@ namespace HangmanClient.MVVM.ViewModel
         public string PlayerInput
         {
             get { return _playerInput; }
-            set 
-            { 
+            set
+            {
                 _playerInput = value;
                 OnPropertyChanged(nameof(PlayerInput));
             }

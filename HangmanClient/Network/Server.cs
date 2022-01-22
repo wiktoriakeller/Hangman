@@ -1,8 +1,6 @@
 ﻿using HangmanClient.MVVM.Model;
 using HangmanClient.Stores;
 using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -114,7 +112,7 @@ namespace HangmanClient.Network
                     var message = await packetReader.GetMessageAsync();
                     var split = message.Split(' ');
                     var code = (OperationCodes)message[0];
-                        switch (code)
+                    switch (code)
                     {
                         case OperationCodes.SendNewRoomId:
                             HandleCreateResponse(split);
@@ -152,7 +150,7 @@ namespace HangmanClient.Network
 
         private void HandleHangmanUpdate(string[] split)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => 
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             _game.Players[_game.PlayerIndexes[split[1]]].HangmanState = int.Parse(split[2])));
         }
 

@@ -1,11 +1,6 @@
 ﻿using HangmanClient.MVVM.ViewModel;
-using HangmanClient.Network;
 using HangmanClient.Stores;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HangmanClient.MVVM.Commands
 {
