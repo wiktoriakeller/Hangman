@@ -205,6 +205,11 @@ std::string Room::GetWinnerPlayer() {
 }
 
 void Room::ClearRoom() {
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		it->second->SetRoomId(-1);
+		it->second->SetName("");
+	}
+
 	_playersInRoom.clear();
 }
 

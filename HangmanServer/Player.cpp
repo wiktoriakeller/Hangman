@@ -291,6 +291,13 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 
 ParseMessegeStatus Player::SendWord() {
 	std::string toSend;
+
+	if (_roomId < 0) {
+		toSend += (uint8_t)OperationCodes::NotInARoom;
+		PrepereToSend(toSend);
+		return ParseMessegeStatus::NoMsgError;
+	}
+
 	toSend += (uint8_t)OperationCodes::SendWord;
 	toSend += " ";
 	toSend += _currentWord;
@@ -300,6 +307,12 @@ ParseMessegeStatus Player::SendWord() {
 
 ParseMessegeStatus Player::CheckLetter(char letter) {
 	std::string toSend;
+	if (_roomId < 0) {
+		toSend += (uint8_t)OperationCodes::NotInARoom;
+		PrepereToSend(toSend);
+		return ParseMessegeStatus::NoMsgError;
+	}
+
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
 	
 	if (room->IsLetterInWord(letter)) {

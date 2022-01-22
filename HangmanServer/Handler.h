@@ -36,7 +36,8 @@ enum OperationCodes {
 	StartGame = 18,
 	StartedWaiting = 19,
 	TimerStopped = 20,
-	RoomCreationFailed = 21
+	RoomCreationFailed = 21,
+	NotInARoom = 22
 };
 
 enum HandleResult {
