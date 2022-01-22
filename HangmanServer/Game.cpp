@@ -13,14 +13,18 @@ void Game::LoadWords() {
 			if (word != "")
 				words.emplace_back(word);
 		}
+		printf("Loaded passwords\n");
+	}
+	else {
+		words.emplace_back("sieci");
 	}
 }
 
 std::string Game::GetRandomWord() {
 	std::random_device dev;
 	std::mt19937 rng(dev());
-	std::uniform_int_distribution<std::mt19937::result_type> dist(0, words.size());
-	return "robo haslo";
+	std::uniform_int_distribution<std::mt19937::result_type> dist(0, words.size() - 1);
+	return words[dist(rng)];
 }
 
 int Game::GetFreeRoomId() {

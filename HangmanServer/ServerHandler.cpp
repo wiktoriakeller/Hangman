@@ -1,12 +1,26 @@
 ﻿#include "ServerHandler.h"
 #include "Player.h"
 #include "Game.h"
+#include <fstream>
 
 ServerHandler::ServerHandler(int epollFd) : _epollFd(epollFd) {
 	sockaddr_in serverAddr{};
 
+	std::fstream configFile;
+	configFile.open("Files//config.txt", std::ios::in);
+	int port;
+	if (configFile.is_open()) {
+		std::string word;
+		configFile >> word;
+		port = stoi(word);
+		printf("Loaded config file\n");
+	}
+	else {
+		port = 12345;
+	}
+
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(SERVER_PORT);
+	serverAddr.sin_port = htons(port);
 	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	_serverSocket = socket(PF_INET, SOCK_STREAM, 0);

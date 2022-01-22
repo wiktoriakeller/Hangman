@@ -32,9 +32,7 @@ enum OperationCodes {
 	IncorrectLetter = 12,
 	CorrectLetter = 13,
 	SendHangmanWithName = 14,
-	PlayerLeft = 15,
 	EndGame = 16,
-	SendTime = 17,
 	StartGame = 18,
 	StartedWaiting = 19,
 	TimerStopped = 20,
@@ -49,9 +47,10 @@ enum HandleResult {
 	EndGameInRoom
 };
 
-enum ParseMessegeError {
+enum ParseMessegeStatus {
 	NoMsgError,
-	TimerFailed
+	TimerFailed,
+	EveryoneHasHangman
 };
 
 class Handler {

@@ -11,6 +11,5 @@ public:
 private:
 	int _serverSocket;
 	int _epollFd;
-	const int SERVER_PORT = 12345;
 	const int one = 1;
 };

@@ -17,18 +17,18 @@ public:
 	void SendToAllBut(std::string message, const std::string& name);
 	bool IsNameUnique(const std::string& name);
 	int GetNumberOfPlayers();
-	std::string GetSecretWord();
 	std::string GetAllPlayerNamesBut(const std::string& name);
 	bool IsLetterInWord(char letter);
 	void InsertCorrectLetter(char letter, std::string& word);
 	void SendToAll(std::string message);
-	ParseMessegeError StartTimer(int time);
+	ParseMessegeStatus StartTimer(int time);
 	void ResetTimer();
 	bool GameStarted();
 	std::string GetHiddenSecretWord();
 	std::string GetWinnerPlayer();
 	void ClearRoom();
 	void SendWinnder();
+	bool EveryoneHasHangman();
 
 private:
 	int _roomId;

@@ -1,6 +1,5 @@
 #include "Room.h"
 #include "Game.h"
-#include <thread>
 #include <chrono>
 
 Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) { 
@@ -8,7 +7,7 @@ Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) {
 	_timerRegistered = false;
 	_timerCreated = false;
 	_gameStarted = false;
-	_gameTime = 30;
+	_gameTime = 90;
 }
 
 void Room::Close() {
@@ -97,10 +96,6 @@ bool Room::IsNameUnique(const std::string& name) {
 	return true;
 }
 
-std::string Room::GetSecretWord() {
-	return _secretWord;
-}
-
 std::string Room::GetAllPlayerNamesBut(const std::string& name) {
 	std::string all = "";
 
@@ -134,12 +129,13 @@ void Room::SendToAll(std::string message) {
 	}
 }
 
-ParseMessegeError Room::StartTimer(int time) {
+ParseMessegeStatus Room::StartTimer(int time) {
 	if (!_timerCreated) {
 		_timerFd = timerfd_create(CLOCK_REALTIME, 0);
 
 		if (_timerFd == -1)
-			return ParseMessegeError::TimerFailed;
+			return ParseMessegeStatus::TimerFailed;
+		_timerCreated = true;
 	}
 
 	struct itimerspec ts;
@@ -149,13 +145,13 @@ ParseMessegeError Room::StartTimer(int time) {
 	ts.it_interval.tv_nsec = 0;
 
 	if (timerfd_settime(_timerFd, 0, &ts, nullptr) == -1)
-		return ParseMessegeError::TimerFailed;
+		return ParseMessegeStatus::TimerFailed;
 
 	epoll_event ee{ EPOLLIN | EPOLLRDHUP, {.ptr = this} };
 	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _timerFd, &ee);
 	_timerRegistered = true;
 
-	return ParseMessegeError::NoMsgError;
+	return ParseMessegeStatus::NoMsgError;
 }
 
 void Room::ResetTimer() {
@@ -163,6 +159,7 @@ void Room::ResetTimer() {
 	_timerRegistered = false;
 	std::string message;
 	message += (uint8_t)OperationCodes::TimerStopped;
+	message += " StoppedWaiting";
 	SendToAll(message);
 }
 
@@ -188,11 +185,21 @@ std::string Room::GetWinnerPlayer() {
 	int max = -1;
 	std::string name;
 	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
-		if (it->second->GetPoints() > max) {
+		if (it->second->GetPoints() > max && it->second->GetHangmanState() < Player::MAX_HANGMAN) {
 			max = it->second->GetPoints();
 			name = it->first;
 		}
+		else if (max != -1 && it->second->GetPoints() == max && it->second->GetHangmanState() < Player::MAX_HANGMAN) {
+			name = "Draw";
+		}
 	}
+
+	if (max == -1) {
+		name = "Draw";
+	}
+
+	name += " ";
+	name += _secretWord;
 
 	return name;
 }
@@ -208,6 +215,18 @@ void Room::SendWinnder() {
 	message += " ";
 	message += winner;
 	SendToAll(message);
+}
+
+bool Room::EveryoneHasHangman() {
+	int number = 0;
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		if (it->second->GetHangmanState() == Player::MAX_HANGMAN)
+			number++;
+	}
+
+	if (number == _playersInRoom.size())
+		return true;
+	return false;
 }
 
 int Room::GetNumberOfPlayers() {
