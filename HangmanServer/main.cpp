@@ -63,7 +63,7 @@ int main() {
 							room->ResetTimer();
 						}
 						else if (room->GetNumberOfPlayers() == 1 && room->GameStarted()) {
-							room->SendWinnder();
+							room->SendWinner();
 							Game::Instance().DeleteRoomAfterGame(roomId);
 						}
 					}

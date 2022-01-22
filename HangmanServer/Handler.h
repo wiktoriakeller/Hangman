@@ -51,7 +51,8 @@ enum HandleResult {
 enum ParseMessegeStatus {
 	NoMsgError,
 	TimerFailed,
-	EveryoneHasHangman
+	EveryoneHasHangman,
+	WinnerFound
 };
 
 class Handler {
