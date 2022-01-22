@@ -7,6 +7,7 @@ Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) {
 	_secretWord = Game::Instance().GetRandomWord();
 	_timerRegistered = false;
 	_timerCreated = false;
+	_gameStarted = false;
 }
 
 void Room::Close() {
@@ -34,6 +35,7 @@ std::tuple<HandleResult, int, int, std::string> Room::Handle(uint events) {
 			message += (uint8_t)OperationCodes::StartGame;
 			message += " Game started";
 			SendToAll(message);
+			_gameStarted = true;
 		}
 	}
 
@@ -150,6 +152,10 @@ void Room::ResetTimer() {
 	std::string message;
 	message += (uint8_t)OperationCodes::TimerStopped;
 	SendToAll(message);
+}
+
+bool Room::GetGameStarted() {
+	return _gameStarted;
 }
 
 int Room::GetNumberOfPlayers() {

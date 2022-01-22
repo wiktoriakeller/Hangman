@@ -212,7 +212,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	ParseMessegeError error = ParseMessegeError::NoMsgError;
 	
 	if (!Game::Instance().DoesRoomExist(roomId)) {
-		toSend += std::to_string((int)OperationCodes::InvalidRoom);
+		toSend += (uint8_t)OperationCodes::InvalidRoom;
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
 	}
@@ -220,13 +220,19 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
 
 	if (!room->IsNameUnique(name)) {
-		toSend += std::to_string((int)OperationCodes::NotUniqueName);
+		toSend += (uint8_t)OperationCodes::NotUniqueName;
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
 	}
 
 	if (room->GetNumberOfPlayers() == Room::ROOM_MAX_SIZE) {
-		toSend += std::to_string((int)OperationCodes::RoomIsFull);
+		toSend += (uint8_t)OperationCodes::RoomIsFull;
+		PrepereToSend(toSend);
+		return ParseMessegeError::NoMsgError;
+	}
+
+	if (room->GetGameStarted()) {
+		toSend += (uint8_t)OperationCodes::GameAlreadyStarted;
 		PrepereToSend(toSend);
 		return ParseMessegeError::NoMsgError;
 	}
@@ -235,12 +241,12 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 	SetRoomId(roomId);
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 
-	toSend += std::to_string((int)OperationCodes::JoinRoom);
+	toSend += (uint8_t)OperationCodes::JoinRoom;
 	toSend += " ";
 	toSend += room->GetAllPlayerNamesBut(name);
 
 	std::string messageToAll;
-	messageToAll += (int)OperationCodes::SendPlayerName;
+	messageToAll += (uint8_t)OperationCodes::SendPlayerName;
 	messageToAll += " ";
 	messageToAll += name;
 
@@ -250,7 +256,7 @@ ParseMessegeError Player::JoinRoom(const std::vector<std::string>& divided) {
 
 	if (room->GetNumberOfPlayers() == 2) {
 		std::string message;
-		message += std::to_string((int)OperationCodes::StartedWaiting);
+		message += (uint8_t)OperationCodes::StartedWaiting;
 		message += " Started waiting";
 		room->SendToAll(message);
 		error = room->StartTimer(10);

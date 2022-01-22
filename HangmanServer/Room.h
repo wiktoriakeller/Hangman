@@ -24,6 +24,7 @@ public:
 	void SendToAll(std::string message);
 	ParseMessegeError StartTimer(int time);
 	void ResetTimer();
+	bool GetGameStarted();
 
 private:
 	int _roomId;
@@ -31,6 +32,7 @@ private:
 	bool _timerRegistered;
 	bool _timerCreated;
 	int _epollFd;
+	bool _gameStarted;
 	std::string _secretWord;
 	std::map<std::string, std::shared_ptr<Player>> _playersInRoom;
 };
