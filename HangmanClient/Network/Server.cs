@@ -1,6 +1,7 @@
 ﻿using HangmanClient.MVVM.Model;
 using HangmanClient.Stores;
 using System;
+using System.Configuration;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,20 +40,33 @@ namespace HangmanClient.Network
         private readonly Game _game;
         private readonly Error _error;
         private bool _operationFailed;
+        private int _timeout;
 
         public Server()
         {
             _game = Game.Instance;
             _error = Error.Instance;
             _tcpClient = new TcpClient();
+
+            var timeout = ConfigurationManager.AppSettings["Tiemout"];
+            if (!int.TryParse(timeout, out _timeout))
+            {
+                _timeout = 25000;
+            }
         }
 
         private bool WaitForResponse()
         {
             _operationFailed = false;
-            bool timeout = _waitHandle.WaitOne();
+            bool completedInTime = _waitHandle.WaitOne(_timeout);
             _waitHandle.Reset();
-            if (timeout && !_operationFailed)
+            if(completedInTime == false)
+            {
+                MessageBox.Show("Connection timeout");
+                Application.Current.Shutdown();
+            }
+
+            if (completedInTime && !_operationFailed)
                 return true;
             return false;
         }
@@ -68,7 +82,8 @@ namespace HangmanClient.Network
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show("Server time out");
+                    MessageBox.Show("Connection timeout");
+                    Application.Current.Shutdown();
                 }
             }
         }
