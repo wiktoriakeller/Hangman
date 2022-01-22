@@ -152,12 +152,14 @@ namespace HangmanClient.Network
 
         private void HandleHangmanUpdate(string[] split)
         {
-            _game.Players[_game.PlayerIndexes[split[1]]].HangmanState = int.Parse(split[2]);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => 
+            _game.Players[_game.PlayerIndexes[split[1]]].HangmanState = int.Parse(split[2])));
         }
 
         private void HandleIncorrectLetter(string[] split)
         {
-            _game.MainPlayer.HangmanState = int.Parse(split[1]);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+           _game.MainPlayer.HangmanState = int.Parse(split[1])));
         }
 
         private void HandleNewWord(string[] split)
