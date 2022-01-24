@@ -16,7 +16,7 @@ public:
 	int GetFreeRoomId();
 	int GetFreePlayerId();
 	void AddRoom(int id, int epollFd);
-	std::shared_ptr<Room> GetRoom(int id);
+	std::shared_ptr<Room> GetRoom(int roomId);
 	void AddPlayer(std::shared_ptr<Player> newPlayer, int id);
 	std::shared_ptr<Player> GetPlayer(int id);
 	void DeleteRoom(int id);
@@ -25,7 +25,7 @@ public:
 	void DeleteAll();
 	void SetServer(std::shared_ptr<Handler> server);
 	void EndGame();
-	bool DoesRoomExist(int id);
+	bool DoesRoomExist(int roomId);
 	void DeleteRoomAfterGame(int roomId);
 
 private:

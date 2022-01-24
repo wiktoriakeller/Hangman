@@ -37,6 +37,5 @@ private:
 	//operation codes handlers
 	ParseMessegeStatus SendNewRoomId(const std::vector<std::string>& divided);
 	ParseMessegeStatus JoinRoom(const std::vector<std::string>& divided);
-	ParseMessegeStatus SendWord();
 	ParseMessegeStatus CheckLetter(char letter);
 };

@@ -19,7 +19,7 @@ void Room::Close() {
 
 	if (_timerRegistered) {
 		epoll_ctl(_epollFd, EPOLL_CTL_DEL, _timerFd, nullptr);
-		printf("Closed room timer fd\n");
+		printf("Timer unregistered\n");
 		_timerRegistered = false;
 	}
 
@@ -28,10 +28,15 @@ void Room::Close() {
 
 std::tuple<HandleResult, int, int, std::string> Room::Handle(uint events) {
 	bool setTimer = false;
+
 	if (events & EPOLLIN) {
 		uint64_t buff;
-		read(_timerFd, &buff, sizeof(uint64_t));
-		if (this->GetNumberOfPlayers() >= 2 && !_gameStarted) {
+		ssize_t count = read(_timerFd, &buff, sizeof(uint64_t));
+		
+		if (count <= 0) {
+			events |= EPOLLERR;
+		}
+		else if (this->GetNumberOfPlayers() >= 2 && !_gameStarted) {
 			std::string message;
 			message += (uint8_t)OperationCodes::StartGame;
 			message += " ";

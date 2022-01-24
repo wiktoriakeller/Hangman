@@ -27,7 +27,6 @@ enum OperationCodes {
 	SendPlayerName = 53,
 	SendAllPlayerNames = 54,
 	RoomIsFull = 55,
-	SendWord = 56,
 	CheckLetter = 57,
 	IncorrectLetter = 58,
 	CorrectLetter = 59,
@@ -37,7 +36,8 @@ enum OperationCodes {
 	StartedWaiting = 63,
 	TimerStopped = 64,
 	RoomCreationFailed = 65,
-	NotInARoom = 66
+	NotInARoom = 66,
+	PlayerLeft = 67
 };
 
 enum HandleResult {

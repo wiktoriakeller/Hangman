@@ -16,6 +16,7 @@ void Game::LoadWords() {
 		printf("Loaded passwords\n");
 	}
 	else {
+		printf("Passwords couldn't be loaded\n");
 		words.emplace_back("sieci");
 	}
 }
@@ -25,6 +26,10 @@ std::string Game::GetRandomWord() {
 	std::mt19937 rng(dev());
 	std::uniform_int_distribution<std::mt19937::result_type> dist(0, words.size() - 1);
 	return words[dist(rng)];
+}
+
+void Game::SetServer(std::shared_ptr<Handler> server) {
+	_server = server;
 }
 
 int Game::GetFreeRoomId() {
@@ -98,20 +103,14 @@ void Game::DeleteAll() {
 	printf("All players and rooms deleted\n");
 }
 
-void Game::SetServer(std::shared_ptr<Handler> server) {
-	_server = server;
-}
-
 void Game::EndGame() {
 	DeleteAll();
 	_server->Close();
 }
 
-bool Game::DoesRoomExist(int id) {
-	for (auto it = _roomsMap.begin(); it != _roomsMap.end(); it++) {
-		if (it->first == id)
-			return true;
-	}
+bool Game::DoesRoomExist(int roomId) {
+	if(_roomsMap.find(roomId) != _roomsMap.end())
+		return true;
 
 	return false;
 }

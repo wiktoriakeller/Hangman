@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Game.h"
 
-Player::Player(int socket, int id, int epollFd) : _socket(socket), _id(id), _roomId(-1), _epollFd(epollFd), _hangmanState(0), _closedSocket(false) {
+Player::Player(int socket, int id, int epollFd) : _socket(socket), _id(id), _roomId(-1), _epollFd(epollFd), _hangmanState(0), _closedSocket(false), _points(0) {
 	epoll_event ee{ EPOLLIN | EPOLLRDHUP, {.ptr = this} };
 	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _socket, &ee);
 }
@@ -50,7 +50,7 @@ std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
 			currentMessagesToRead.insert(currentMessagesToRead.end(), buffer, buffer + count);
 			std::string tmpMessage;
 
-			for (int i = 0; i < currentMessagesToRead.size(); i++) {
+			for (size_t i = 0; i < currentMessagesToRead.size(); i++) {
 				if (currentMessagesToRead[i] == '\n') {
 					tmpMessage += currentMessagesToRead[i];
 					ParseMessegeStatus error = ParseMessage(tmpMessage);
@@ -78,7 +78,7 @@ std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
 	}
 
 	if (events & EPOLLOUT) {
-		int i = 0;
+		size_t i = 0;
 		bool dataToSend = currentMessagesToSend.size() > 0 ? true : false;
 
 		while (dataToSend) {
@@ -116,14 +116,18 @@ std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
 	if (winnerFound) {
 		printf("Winner found\n");
 		std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
-		room->SendWinner();
+		if(room != nullptr) 
+			room->SendWinner();
+
 		return std::make_tuple(HandleResult::EndGameInRoom, _roomId, 0, "");
 	}
 
 	if (everyoneHasHangman) {
 		printf("Everyone has hangman\n");
 		std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
-		room->SendWinner();
+		if(room != nullptr)
+			room->SendWinner();
+
 		return std::make_tuple(HandleResult::EndGameInRoom, _roomId, 0, "");
 	}
 
@@ -132,6 +136,15 @@ std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
 	}
 
 	if (events & ~(EPOLLIN | EPOLLOUT)) {
+		std::shared_ptr<Room> room = Game::Instance().GetRoom(_roomId);
+		if (room != nullptr) {
+			std::string message;
+			message += (uint8_t)OperationCodes::PlayerLeft;
+			message += " ";
+			message += _name;
+			room->SendToAllBut(message, _name);
+		}
+		
 		Close();
 		return std::make_tuple(HandleResult::DeletePlayer, _id, _roomId, _name);
 	}
@@ -171,9 +184,9 @@ std::string Player::GetCurrentWord() {
 }
 
 ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divided) {
-	OperationCodes operationType = (OperationCodes)divided[0][0];
-	//OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
-	ParseMessegeStatus error;
+	//OperationCodes operationType = (OperationCodes)divided[0][0];
+	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
+	ParseMessegeStatus error = ParseMessegeStatus::NoMsgError;
 
 	switch (operationType)
 	{
@@ -182,9 +195,6 @@ ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divid
 		break;
 	case OperationCodes::JoinRoom:
 		error = JoinRoom(divided);
-		break;
-	case OperationCodes::SendWord:
-		error = SendWord();
 		break;
 	case OperationCodes::CheckLetter:
 		error = CheckLetter(divided[1][0]);
@@ -200,7 +210,7 @@ ParseMessegeStatus Player::ParseMessage(std::string message) {
 	std::vector<std::string> divided;
 	std::string messagePart;
 
-	for (int i = 0; i < message.size(); i++) {
+	for (size_t i = 0; i < message.size(); i++) {
 		if (message[i] == '\n' && messagePart.size() != 0) {
 			divided.emplace_back(messagePart);
 		}
@@ -295,28 +305,18 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 	if (room->GetNumberOfPlayers() == 2) {
 		std::string message;
 		message += (uint8_t)OperationCodes::StartedWaiting;
-		message += " StartedWaiting";
+		message += " Waiting";
 		room->SendToAll(message);
 		error = room->StartTimer(20);
 	}
-
-	return error;
-}
-
-ParseMessegeStatus Player::SendWord() {
-	std::string toSend;
-
-	if (_roomId < 0) {
-		toSend += (uint8_t)OperationCodes::NotInARoom;
-		PrepereToSend(toSend);
-		return ParseMessegeStatus::NoMsgError;
+	else if (room->GetNumberOfPlayers() > 2) {
+		std::string message;
+		message += (uint8_t)OperationCodes::StartedWaiting;
+		message += " Waiting";
+		PrepereToSend(message);
 	}
 
-	toSend += (uint8_t)OperationCodes::SendWord;
-	toSend += " ";
-	toSend += _currentWord;
-	PrepereToSend(toSend);
-	return ParseMessegeStatus::NoMsgError;
+	return error;
 }
 
 ParseMessegeStatus Player::CheckLetter(char letter) {

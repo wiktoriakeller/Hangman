@@ -16,6 +16,7 @@ ServerHandler::ServerHandler(int epollFd) : _epollFd(epollFd) {
 		printf("Loaded config file\n");
 	}
 	else {
+		printf("Config file couldn't be loaded\n");
 		port = 12345;
 	}
 
