@@ -29,7 +29,8 @@ namespace HangmanClient.Network
         StartedWaiting = 63,
         TimerStopped = 64,
         RoomCreationFailed = 65,
-        NotInARoom = 66
+        NotInARoom = 66,
+        PlayerLeft = 67
     }
 
     public class Server
@@ -165,7 +166,7 @@ namespace HangmanClient.Network
                             HandleIncorrectLetter(split);
                             break;
                         case OperationCodes.CorrectLetter:
-                            HandleNewWord(split);
+                            HandleNewWord(split[1]);
                             break;
                         case OperationCodes.SendHangmanWithName:
                             HandleHangmanUpdate(split);
@@ -174,16 +175,30 @@ namespace HangmanClient.Network
                             HandleStartGame(split);
                             break;
                         case OperationCodes.StartedWaiting:
-                            HandleNewWord(split);
+                            HandleNewWord(split[1]);
                             break;
                         case OperationCodes.EndGame:
                             HandleEndGame(split);
+                            break;
+                        case OperationCodes.PlayerLeft:
+                            HandlePlayerLeft(split);
+                            break;
+                        case OperationCodes.TimerStopped:
+                            HandleNewWord("Waiting for players");
                             break;
                         default:
                             break;
                     }
                 }
             });
+        }
+
+        private void HandlePlayerLeft(string[] split)
+        {
+            var playerName = split[1];
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            _game.RemovePlayer(playerName)));
+
         }
 
         private void HandleEndGame(string[] split)
@@ -215,9 +230,9 @@ namespace HangmanClient.Network
             }
         }
 
-        private void HandleNewWord(string[] split)
+        private void HandleNewWord(string message)
         {
-            _game.SecretWord = split[1];
+            _game.SecretWord = message;
         }
 
         private void HandleNewPlayer(string[] split)

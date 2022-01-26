@@ -67,6 +67,15 @@ namespace HangmanClient.Stores
             PlayerIndexes.Add(player.Username, Players.Count);
             Players.Add(player);
         }
+
+        public void RemovePlayer(string username)
+        {
+            int index;
+            if (PlayerIndexes.TryGetValue(username, out index))
+            {
+                Players.RemoveAt(index);
+            }
+        }
         public Player MainPlayer { get; set; }
     }
 }
