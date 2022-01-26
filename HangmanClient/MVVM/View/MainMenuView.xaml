@@ -17,14 +17,16 @@
                    FontSize="32" Margin="25"/>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1"
-                    HorizontalAlignment="Center">
-            <Button Content="Join a room" Width="auto"
+                    HorizontalAlignment="Center" Margin="0 30">
+            <Button Content="JOIN GAME"
                     Margin="25 0 25 0"
                     Padding="5 5 5 5"
+                    Width="150"
                     Command="{Binding JoinCommand}"/>
-            <Button Content="Create a room" Width="auto"
+            <Button Content="NEW GAME"
                     Margin="25 0 25 0"
                     Padding="5 5 5 5"
+                    Width="150"
                     Command="{Binding CreateCommand}"/>
 
         </StackPanel>  
