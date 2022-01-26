@@ -7,7 +7,7 @@ Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) {
 	_timerRegistered = false;
 	_timerCreated = false;
 	_gameStarted = false;
-	_gameTime = 120;
+	_gameTime = Game::Instance().GetGameTime();
 }
 
 void Room::Close() {
@@ -121,7 +121,7 @@ bool Room::IsLetterInSecretWord(char letter) {
 }
 
 void Room::InsertCorrectLetter(char letter, std::string& word) {
-	for (int i = 0; i < _secretWord.size(); i++) {
+	for (size_t i = 0; i < _secretWord.size(); i++) {
 		if (_secretWord[i] == letter) {
 			word[i] = letter;
 		}
@@ -164,7 +164,6 @@ void Room::ResetTimer() {
 	_timerRegistered = false;
 	std::string message;
 	message += (uint8_t)OperationCodes::TimerStopped;
-	message += " StoppedWaiting";
 	SendToAll(message);
 }
 
@@ -174,8 +173,7 @@ bool Room::GameStarted() {
 
 std::string Room::GetHiddenSecretWord() {
 	std::string word = "";
-	printf("%s\n", _secretWord.c_str());
-	for (int i = 0; i < _secretWord.size(); i++) {
+	for (size_t i = 0; i < _secretWord.size(); i++) {
 		if (_secretWord[i] != ' ' && _secretWord[i] != '\n' && _secretWord[i] != '\r') {
 			word += "*";
 		}
@@ -198,16 +196,11 @@ std::string Room::GetWinnerPlayer() {
 		else if (max != -1 && it->second->GetPoints() == max && it->second->GetHangmanState() < Player::MAX_HANGMAN) {
 			name = "Draw";
 		}
-
-		printf("%s %d\n", it->first.c_str(), it->second->GetPoints());
 	}
 
 	if (max == -1) {
 		name = "Draw";
 	}
-
-	name += " ";
-	name += _secretWord;
 
 	return name;
 }
@@ -224,9 +217,18 @@ void Room::ClearRoom() {
 void Room::SendWinner() {
 	std::string message;
 	std::string winner = GetWinnerPlayer();
-	message += (uint8_t)OperationCodes::EndGame;
+
+	if (winner == "Draw") {
+		message += (uint8_t)OperationCodes::Draw;
+	}
+	else {
+		message += (uint8_t)OperationCodes::EndGame;
+		message += " ";
+		message += winner;
+	}
+
 	message += " ";
-	message += winner;
+	message += _secretWord;
 	SendToAll(message);
 }
 
@@ -246,7 +248,7 @@ bool Room::WinnerFound() {
 	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
 		std::string playerWord = it->second->GetCurrentWord();
 		int foundStars = 0;
-		for (int i = 0; i < playerWord.size(); i++) {
+		for (size_t i = 0; i < playerWord.size(); i++) {
 			if (playerWord[i] == '*')
 				foundStars++;
 		}
