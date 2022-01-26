@@ -202,9 +202,6 @@ std::string Room::GetWinnerPlayer() {
 		name = "Draw";
 	}
 
-	name += " ";
-	name += _secretWord;
-
 	return name;
 }
 
@@ -220,9 +217,18 @@ void Room::ClearRoom() {
 void Room::SendWinner() {
 	std::string message;
 	std::string winner = GetWinnerPlayer();
-	message += (uint8_t)OperationCodes::EndGame;
+
+	if (winner == "Draw") {
+		message += (uint8_t)OperationCodes::Draw;
+	}
+	else {
+		message += (uint8_t)OperationCodes::EndGame;
+		message += " ";
+		message += winner;
+	}
+
 	message += " ";
-	message += winner;
+	message += _secretWord;
 	SendToAll(message);
 }
 

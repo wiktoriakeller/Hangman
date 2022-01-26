@@ -209,8 +209,8 @@ ParseMessegeStatus Player::ParseMessage(std::string message) {
 
 ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divided) {
 	ParseMessegeStatus error = ParseMessegeStatus::NoMsgError;
-	OperationCodes operationType = (OperationCodes)divided[0][0];
-	//OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
+	//OperationCodes operationType = (OperationCodes)divided[0][0];
+	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
 
 	switch (operationType)
 	{

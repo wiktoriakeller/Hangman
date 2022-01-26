@@ -37,7 +37,8 @@ enum OperationCodes {
 	TimerStopped = 64,
 	RoomCreationFailed = 65,
 	NotInARoom = 66,
-	PlayerLeft = 67
+	PlayerLeft = 67,
+	Draw = 68
 };
 
 enum HandleResult {
