@@ -6,9 +6,9 @@
 void Game::Setup() {
 	std::fstream wordsFile;
 	wordsFile.open("Files//words.txt", std::ios::in);
-	std::string word;
 
 	if (wordsFile.is_open()) {
+		std::string word;
 		while (wordsFile) {
 			std::getline(wordsFile, word);
 			if (word != "")
