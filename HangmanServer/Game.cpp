@@ -1,8 +1,9 @@
 #include "Game.h"
 #include <fstream>
 #include <random>
+#include <sstream>
 
-void Game::LoadWords() {
+void Game::Setup() {
 	std::fstream wordsFile;
 	wordsFile.open("Files//words.txt", std::ios::in);
 	std::string word;
@@ -18,6 +19,57 @@ void Game::LoadWords() {
 	else {
 		printf("Passwords couldn't be loaded\n");
 		words.emplace_back("sieci");
+	}
+
+	std::fstream configFile;
+	configFile.open("Files//config.txt", std::ios::in);
+	if (configFile.is_open()) {
+		std::string word;
+		configFile >> word;
+		_port = LoadNumber(word);
+
+		if (_port == -1) {
+			_port = 12345;
+			printf("Error in loading port\n");
+		}
+
+		configFile >> word;
+		_gameTime = LoadNumber(word);
+		
+		if (_gameTime == -1) {
+			_gameTime = 120;
+			printf("Error in loading game time\n");
+		}
+
+		configFile >> word;
+		_waitingTime = LoadNumber(word);
+
+		if (_waitingTime == -1) {
+			_waitingTime = 30;
+			printf("Error in loading waiting time");
+		}
+
+		printf("Loaded config file\n");
+	}
+	else {
+		printf("Config file couldn't be loaded\n");
+		_port = 12345;
+	}
+}
+
+int Game::LoadNumber(std::string word) {
+	try {
+		std::stringstream ss(word);
+		int number;
+
+		if ((ss >> number).fail()) {
+			throw std::bad_cast();
+		}
+
+		return number;
+	}
+	catch (std::bad_cast const&) {
+		return -1;
 	}
 }
 
@@ -48,6 +100,18 @@ int Game::GetFreePlayerId() {
 	}
 
 	return -1;
+}
+
+int Game::GetPort() {
+	return _port;
+}
+
+int Game::GetGameTime() {
+	return _gameTime;
+}
+
+int Game::GetWaitingTime() {
+	return _waitingTime;
 }
 
 void Game::AddRoom(int id, int epollFd) {

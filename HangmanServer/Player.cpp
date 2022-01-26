@@ -32,6 +32,18 @@ void Player::SetRoomId(int id) {
 	_roomId = id;
 }
 
+int Player::GetPoints() {
+	return _points;
+}
+
+int Player::GetHangmanState() {
+	return _hangmanState;
+}
+
+std::string Player::GetCurrentWord() {
+	return _currentWord;
+}
+
 std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
 	bool timerError = false;
 	bool everyoneHasHangman = false;
@@ -171,42 +183,10 @@ void Player::PrepereToSend(std::string message) {
 	}
 }
 
-int Player::GetPoints() {
-	return _points;
-}
-
-int Player::GetHangmanState() {
-	return _hangmanState;
-}
-
-std::string Player::GetCurrentWord() {
-	return _currentWord;
-}
-
-ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divided) {
-	//OperationCodes operationType = (OperationCodes)divided[0][0];
-	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
-	ParseMessegeStatus error = ParseMessegeStatus::NoMsgError;
-
-	switch (operationType)
-	{
-	case OperationCodes::SendNewRoomId:
-		error = SendNewRoomId(divided);
-		break;
-	case OperationCodes::JoinRoom:
-		error = JoinRoom(divided);
-		break;
-	case OperationCodes::CheckLetter:
-		error = CheckLetter(divided[1][0]);
-		break;
-	default:
-		break;
-	}
-
-	return error;
-}
-
 ParseMessegeStatus Player::ParseMessage(std::string message) {
+	if (message[0] == '\n')
+		return ParseMessegeStatus::NoMsgError;
+
 	std::vector<std::string> divided;
 	std::string messagePart;
 
@@ -224,6 +204,29 @@ ParseMessegeStatus Player::ParseMessage(std::string message) {
 	}
 
 	ParseMessegeStatus error = HandleOperation(divided);
+	return error;
+}
+
+ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divided) {
+	ParseMessegeStatus error = ParseMessegeStatus::NoMsgError;
+	OperationCodes operationType = (OperationCodes)divided[0][0];
+	//OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
+
+	switch (operationType)
+	{
+	case OperationCodes::SendNewRoomId:
+		error = SendNewRoomId(divided);
+		break;
+	case OperationCodes::JoinRoom:
+		error = JoinRoom(divided);
+		break;
+	case OperationCodes::CheckLetter:
+		error = CheckLetter(divided[1][0]);
+		break;
+	default:
+		break;
+	}
+
 	return error;
 }
 
@@ -261,7 +264,7 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 	if (!Game::Instance().DoesRoomExist(roomId)) {
 		toSend += (uint8_t)OperationCodes::InvalidRoom;
 		PrepereToSend(toSend);
-		return ParseMessegeStatus::NoMsgError;
+		return error;
 	}
 	
 	std::shared_ptr<Room> room = Game::Instance().GetRoom(roomId);
@@ -269,19 +272,19 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 	if (!room->IsNameUnique(name)) {
 		toSend += (uint8_t)OperationCodes::NotUniqueName;
 		PrepereToSend(toSend);
-		return ParseMessegeStatus::NoMsgError;
+		return error;
 	}
 
 	if (room->GetNumberOfPlayers() == Room::ROOM_MAX_SIZE) {
 		toSend += (uint8_t)OperationCodes::RoomIsFull;
 		PrepereToSend(toSend);
-		return ParseMessegeStatus::NoMsgError;
+		return error;
 	}
 
 	if (room->GameStarted()) {
 		toSend += (uint8_t)OperationCodes::GameAlreadyStarted;
 		PrepereToSend(toSend);
-		return ParseMessegeStatus::NoMsgError;
+		return error;
 	}
 
 	SetName(name);
@@ -305,14 +308,12 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 	if (room->GetNumberOfPlayers() == 2) {
 		std::string message;
 		message += (uint8_t)OperationCodes::StartedWaiting;
-		message += " Waiting";
 		room->SendToAll(message);
-		error = room->StartTimer(20);
+		error = room->StartTimer(Game::Instance().GetWaitingTime());
 	}
 	else if (room->GetNumberOfPlayers() > 2) {
 		std::string message;
 		message += (uint8_t)OperationCodes::StartedWaiting;
-		message += " Waiting";
 		PrepereToSend(message);
 	}
 
@@ -340,7 +341,6 @@ ParseMessegeStatus Player::CheckLetter(char letter) {
 		toSend += _currentWord;
 
 		PrepereToSend(toSend);
-
 
 		bool status = room->WinnerFound();
 		if (status)

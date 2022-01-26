@@ -6,20 +6,7 @@
 ServerHandler::ServerHandler(int epollFd) : _epollFd(epollFd) {
 	sockaddr_in serverAddr{};
 
-	std::fstream configFile;
-	configFile.open("Files//config.txt", std::ios::in);
-	int port;
-	if (configFile.is_open()) {
-		std::string word;
-		configFile >> word;
-		port = stoi(word);
-		printf("Loaded config file\n");
-	}
-	else {
-		printf("Config file couldn't be loaded\n");
-		port = 12345;
-	}
-
+	int port = Game::Instance().GetPort();
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
 	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
