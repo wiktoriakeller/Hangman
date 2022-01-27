@@ -18,7 +18,7 @@
         <TextBlock Text="Join a Room" Grid.Row="0" FontSize="32"/>
         
         <StackPanel Orientation="Vertical" Grid.Row="1">
-            <TextBlock HorizontalAlignment="Center" Margin="0 0 300 0" Text="Room ID" />
+            <TextBlock HorizontalAlignment="Center" Margin="-3 0 300 0" Text="Room ID" />
             <TextBox  MaxWidth="350" MaxLength="10" 
                       Text="{Binding RoomId , UpdateSourceTrigger=PropertyChanged}" Margin="0 5 0 0"/>
         </StackPanel>
@@ -28,7 +28,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <TextBlock HorizontalAlignment="Center" Margin="0 0 300 0" Text="Username" Grid.Row="0" />
+            <TextBlock HorizontalAlignment="Center" Margin="5 0 300 0" Text="Username" Grid.Row="0" />
             <TextBox Grid.Row="1" MaxLength="24" MaxWidth="350"
                      Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0 5 0 0"/>
         </Grid>

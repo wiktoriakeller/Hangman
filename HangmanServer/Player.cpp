@@ -45,7 +45,7 @@ std::string Player::GetCurrentWord() {
 }
 
 void Player::SetHangmanState(int state) {
-	_hangmanState = 0;
+	_hangmanState = state;
 }
 
 void Player::SetPoints(int points) {
@@ -370,8 +370,8 @@ ParseMessegeStatus Player::CheckLetter(char letter) {
 		messageToAll += std::to_string(_hangmanState);
 		room->SendToAllBut(messageToAll, _name);
 
-		bool status = room->EveryoneHasHangman();
-		if (status)
+		int playersWithoutHangman = room->PlayersLeftWithoutHangman();
+		if (playersWithoutHangman == 0 || playersWithoutHangman == 1)
 			return ParseMessegeStatus::EveryoneHasHangman;
 	}
 

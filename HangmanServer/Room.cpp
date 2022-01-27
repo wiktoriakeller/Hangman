@@ -234,18 +234,6 @@ void Room::SendWinner() {
 	SendToAll(message);
 }
 
-bool Room::EveryoneHasHangman() {
-	int number = 0;
-	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
-		if (it->second->GetHangmanState() == Player::MAX_HANGMAN)
-			number++;
-	}
-
-	if (number == _playersInRoom.size())
-		return true;
-	return false;
-}
-
 bool Room::WinnerFound() {
 	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
 		std::string playerWord = it->second->GetCurrentWord();
@@ -260,6 +248,16 @@ bool Room::WinnerFound() {
 	}
 
 	return false;
+}
+
+int Room::PlayersLeftWithoutHangman() {
+	int number = 0;
+	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
+		if (it->second->GetHangmanState() < Player::MAX_HANGMAN)
+			number++;
+	}
+
+	return number;
 }
 
 int Room::GetNumberOfPlayers() {

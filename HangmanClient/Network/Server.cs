@@ -118,6 +118,7 @@ namespace HangmanClient.Network
 
         public void SubmitLetter(string letter)
         {
+            letter = letter.ToLower();
             var packet = PacketWriter.GetPacket((byte)OperationCodes.CheckLetter, letter);
             _tcpClient.Client.Send(packet);
         }
@@ -201,7 +202,7 @@ namespace HangmanClient.Network
         {
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameStarted = false));
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameOver = true));
-            _game.SecretWord = $"Game Over\nIt is a draw!\nSecret word was: {split[1]}";
+            _game.SecretWord = $"Game Over, it is a draw!\nSecret word was: {split[1]}";
         }
 
         private void HandlePlayerLeft(string[] split)
@@ -216,7 +217,7 @@ namespace HangmanClient.Network
         {
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameStarted = false));
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameOver = true));
-            _game.SecretWord = $"Game Over\n{split[1]} is the winner!\nSecret word was: {split[1]}";
+            _game.SecretWord = $"Game Over, {split[1]} is the winner!\nSecret word was: {split[2]}";
         }
 
         private void HandleStartGame(string[] split)

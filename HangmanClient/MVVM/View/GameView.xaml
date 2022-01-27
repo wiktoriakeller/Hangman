@@ -26,9 +26,9 @@
                          Text="{Binding PlayerInput, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Content="Submit" VerticalAlignment="Top" Width="75"
                         Command="{Binding SubmitLetter}"/>
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                    <local:SecretWordView Loaded="SecretWordView_Loaded_1"/>
-                    <Button Content="End game" 
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="25">
+                    <local:SecretWordView HorizontalAlignment="Left" Margin="0 0 0 10" Height="62" Width="300"/>
+                    <Button Content="End game" HorizontalAlignment="Left" 
                             Command="{Binding BackCommand}" Width="150"/>
                 </StackPanel>
             </StackPanel>

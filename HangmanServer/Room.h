@@ -28,8 +28,8 @@ public:
 	std::string GetWinnerPlayer();
 	void ClearRoom();
 	void SendWinner();
-	bool EveryoneHasHangman();
 	bool WinnerFound();
+	int PlayersLeftWithoutHangman();
 
 private:
 	int _roomId;
