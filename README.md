@@ -11,9 +11,9 @@ make
 
 Tu run the client application use following commands:
 ```
-cd HangmanClient\
+cd .\HangmanClient
 dotnet publish -c Release --output .\MyTargetFolder HangmanClient.sln
-cd \MyTargerFolder
+cd .\MyTargerFolder
 start HangmanClient (or double click on HangmanClient.exe)
 ```
 
