@@ -35,7 +35,7 @@ namespace HangmanClient
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            _navigationStore.CurrentViewModel = new MainMenuViewModel(_navigationStore, CreateJoinRoomViewModel, CreateCreateRoomViewModel);
+            _navigationStore.CurrentViewModel = CreateMainMenuViewModel();
 
             MainWindow = new MainWindow()
             {
@@ -47,7 +47,7 @@ namespace HangmanClient
 
         private GameViewModel CreateGameViewModel()
         {
-            return new GameViewModel(_server);
+            return new GameViewModel(_server, _navigationStore);
         }
 
         private CreateRoomViewModel CreateCreateRoomViewModel()
@@ -64,7 +64,9 @@ namespace HangmanClient
         {
             if (_navigationStore.mainMenuViewModel == null)
             {
-                return new MainMenuViewModel(_navigationStore, CreateJoinRoomViewModel, CreateCreateRoomViewModel);
+                var model = new MainMenuViewModel(_navigationStore, CreateJoinRoomViewModel, CreateCreateRoomViewModel);
+                _navigationStore.mainMenuViewModel = model;
+                return model;
             }
             return _navigationStore.mainMenuViewModel;
         }

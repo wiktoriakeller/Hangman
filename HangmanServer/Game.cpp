@@ -37,7 +37,7 @@ void Game::Setup() {
 		_gameTime = LoadNumber(word);
 		
 		if (_gameTime == -1) {
-			_gameTime = 120;
+			_gameTime = 15;
 			printf("Error in loading game time\n");
 		}
 
@@ -45,7 +45,7 @@ void Game::Setup() {
 		_waitingTime = LoadNumber(word);
 
 		if (_waitingTime == -1) {
-			_waitingTime = 30;
+			_waitingTime = 10;
 			printf("Error in loading waiting time");
 		}
 

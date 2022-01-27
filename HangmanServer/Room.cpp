@@ -209,6 +209,8 @@ void Room::ClearRoom() {
 	for (auto it = _playersInRoom.begin(); it != _playersInRoom.end(); it++) {
 		it->second->SetRoomId(-1);
 		it->second->SetName("");
+		it->second->SetHangmanState(0);
+		it->second->SetPoints(0);
 	}
 
 	_playersInRoom.clear();

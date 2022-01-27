@@ -9,6 +9,7 @@ namespace HangmanClient.Stores
     {
         public IDictionary<string, int> PlayerIndexes;
         public bool GameStarted;
+        private bool gameOver;
         public event PropertyChangedEventHandler? PropertyChanged;
         private ObservableCollection<Player> _players;
         public ObservableCollection<Player> Players
@@ -38,11 +39,6 @@ namespace HangmanClient.Stores
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SecretWord)));
             }
         }
-        private Game()
-        {
-            _players = new ObservableCollection<Player>();
-            PlayerIndexes = new Dictionary<string, int>();
-        }
         private static volatile Game? instance;
         public static Game Instance
         {
@@ -61,7 +57,22 @@ namespace HangmanClient.Stores
                 return instance;
             }
         }
+        public Player MainPlayer { get; set; }
+        public bool GameOver { get => gameOver; set 
+            { 
+                gameOver = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GameOver)));
+            } 
+        }
         private static object m_lock = new object();
+        private Game()
+        {
+            secretWord = "Waiting for players";
+            GameOver = false;
+            GameStarted = false;
+            _players = new ObservableCollection<Player>();
+            PlayerIndexes = new Dictionary<string, int>();
+        }
         public void AddPlayer(Player player)
         {
             PlayerIndexes.Add(player.Username, Players.Count);
@@ -74,8 +85,15 @@ namespace HangmanClient.Stores
             if (PlayerIndexes.TryGetValue(username, out index))
             {
                 Players.RemoveAt(index);
+                PlayerIndexes.Remove(username);
             }
         }
-        public Player MainPlayer { get; set; }
+
+        public void Reset()
+        {
+            Players.Clear();
+            PlayerIndexes.Clear();
+            SecretWord = string.Empty;
+        }
     }
 }

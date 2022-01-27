@@ -1,12 +1,12 @@
 ﻿using HangmanClient.MVVM.Commands;
 using HangmanClient.Network;
+using HangmanClient.Stores;
 using System.Windows.Input;
 
 namespace HangmanClient.MVVM.ViewModel
 {
     public class GameViewModel : ViewModelBase
     {
-        private readonly Server _server;
         private string _playerInput;
         public string PlayerInput
         {
@@ -18,12 +18,12 @@ namespace HangmanClient.MVVM.ViewModel
             }
         }
         public ICommand SubmitLetter { get; }
-        public GameViewModel(Server server)
+        public ICommand BackCommand { get; }
+        public GameViewModel(Server server, NavigationStore navigationStore)
         {
-            _server = server;
             _playerInput = "";
             SubmitLetter = new SubmitCommand(this, server);
+            BackCommand = new FinishGameCommand(navigationStore);
         }
-
     }
 }

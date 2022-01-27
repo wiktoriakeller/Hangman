@@ -15,6 +15,8 @@ public:
 	int GetPoints();
 	int GetHangmanState();
 	std::string GetCurrentWord();
+	void SetHangmanState(int state);
+	void SetPoints(int points);
 
 private:
 	const size_t BUFFER_SIZE = 128;

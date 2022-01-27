@@ -30,7 +30,8 @@ namespace HangmanClient.Network
         TimerStopped = 64,
         RoomCreationFailed = 65,
         NotInARoom = 66,
-        PlayerLeft = 67
+        PlayerLeft = 67,
+        Draw = 68
     }
 
     public class Server
@@ -175,7 +176,7 @@ namespace HangmanClient.Network
                             HandleStartGame(split);
                             break;
                         case OperationCodes.StartedWaiting:
-                            HandleNewWord(split[1]);
+                            HandleNewWord("Game will start soon...");
                             break;
                         case OperationCodes.EndGame:
                             HandleEndGame(split);
@@ -186,11 +187,21 @@ namespace HangmanClient.Network
                         case OperationCodes.TimerStopped:
                             HandleNewWord("Waiting for players");
                             break;
+                        case OperationCodes.Draw:
+                            HandleDraw(split);
+                            break;
                         default:
                             break;
                     }
                 }
             });
+        }
+
+        private void HandleDraw(string[] split)
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameStarted = false));
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameOver = true));
+            _game.SecretWord = $"Game Over\nIt is a draw!\nSecret word was: {split[1]}";
         }
 
         private void HandlePlayerLeft(string[] split)
@@ -203,8 +214,9 @@ namespace HangmanClient.Network
 
         private void HandleEndGame(string[] split)
         {
-            _game.GameStarted = false;
-            _game.SecretWord = $"Game Over\n{split[1]} is the winner!";
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameStarted = false));
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameOver = true));
+            _game.SecretWord = $"Game Over\n{split[1]} is the winner!\nSecret word was: {split[1]}";
         }
 
         private void HandleStartGame(string[] split)
@@ -248,7 +260,7 @@ namespace HangmanClient.Network
                 if (split[i] != "")
                 {
                     Player player = new Player(split[i], 0);
-                    _game.AddPlayer(player);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.AddPlayer(player)));
                 }
             }
             _waitHandle.Set();

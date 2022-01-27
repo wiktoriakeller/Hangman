@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HangmanClient.MVVM.View" xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:GameViewModel}"
              mc:Ignorable="d" 
-             d:DesignHeight="520" d:DesignWidth="900"
+             d:DesignHeight="520" d:DesignWidth="900" FontSize="16"
              >
     <Grid>
         <Grid.RowDefinitions> 
@@ -13,9 +13,9 @@
         </Grid.RowDefinitions>
 
         <DockPanel LastChildFill="True">
-            <local:RoomNumberView DockPanel.Dock="Top" FontSize="32" 
+            <local:RoomNumberView DockPanel.Dock="Top" FontSize="28" 
                                   Height="42" Width="350" 
-                                  HorizontalAlignment="Left"/>
+                                  HorizontalAlignment="Left" Margin="0 0 0 15"/>
             <local:PlayerGallery  DockPanel.Dock="Bottom" MinHeight="150"/>
             <local:MainPlayerView  DockPanel.Dock="Right" MinWidth="50" MinHeight="150"/>
             <StackPanel Orientation="Horizontal" Grid.Row="1">
@@ -24,9 +24,13 @@
                          HorizontalContentAlignment="Center"
                          Margin="15 0" VerticalAlignment="Top"
                          Text="{Binding PlayerInput, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Content="Submit" VerticalAlignment="Top" 
+                <Button Content="Submit" VerticalAlignment="Top" Width="75"
                         Command="{Binding SubmitLetter}"/>
-                <local:SecretWordView/>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                    <local:SecretWordView Loaded="SecretWordView_Loaded_1"/>
+                    <Button Content="End game" 
+                            Command="{Binding BackCommand}" Width="150"/>
+                </StackPanel>
             </StackPanel>
         </DockPanel>
     </Grid>

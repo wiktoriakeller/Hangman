@@ -44,6 +44,14 @@ std::string Player::GetCurrentWord() {
 	return _currentWord;
 }
 
+void Player::SetHangmanState(int state) {
+	_hangmanState = 0;
+}
+
+void Player::SetPoints(int points) {
+	_points = points;
+}
+
 std::tuple<HandleResult, int, int, std::string> Player::Handle(uint events) {
 	bool timerError = false;
 	bool everyoneHasHangman = false;
@@ -184,9 +192,6 @@ void Player::PrepereToSend(std::string message) {
 }
 
 ParseMessegeStatus Player::ParseMessage(std::string message) {
-	if (message[0] == '\n')
-		return ParseMessegeStatus::NoMsgError;
-
 	std::vector<std::string> divided;
 	std::string messagePart;
 
@@ -209,8 +214,8 @@ ParseMessegeStatus Player::ParseMessage(std::string message) {
 
 ParseMessegeStatus Player::HandleOperation(const std::vector<std::string>& divided) {
 	ParseMessegeStatus error = ParseMessegeStatus::NoMsgError;
-	//OperationCodes operationType = (OperationCodes)divided[0][0];
-	OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
+	OperationCodes operationType = (OperationCodes)divided[0][0];
+	//OperationCodes operationType = (OperationCodes)stoi(divided[0] + '\0');
 
 	switch (operationType)
 	{
@@ -245,6 +250,7 @@ ParseMessegeStatus Player::SendNewRoomId(const std::vector<std::string>& divided
 		room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 		_currentWord = room->GetHiddenSecretWord();
 		_points = 0;
+		_hangmanState = 0;
 
 		toSend += (uint8_t)OperationCodes::SendNewRoomId;
 		toSend += " ";
@@ -290,6 +296,7 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 	SetName(name);
 	SetRoomId(roomId);
 	_points = 0;
+	_hangmanState = 0;
 	_currentWord = room->GetHiddenSecretWord();
 
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
