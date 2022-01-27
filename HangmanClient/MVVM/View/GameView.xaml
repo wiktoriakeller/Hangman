@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="HangmanClient.MVVM.View.GameView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HangmanClient.MVVM.View" xmlns:viewmodel="clr-namespace:HangmanClient.MVVM.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:GameViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="520" d:DesignWidth="900" FontSize="16"
+             >
+    <Grid>
+        <Grid.RowDefinitions> 
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel LastChildFill="True">
+            <local:RoomNumberView DockPanel.Dock="Top" FontSize="28" 
+                                  Height="42" Width="350" 
+                                  HorizontalAlignment="Left" Margin="0 0 0 15"/>
+            <local:PlayerGallery  DockPanel.Dock="Bottom" MinHeight="150"/>
+            <local:MainPlayerView  DockPanel.Dock="Right" MinWidth="50" MinHeight="150"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Text="Select a letter: " VerticalAlignment="Top"/>
+                <TextBox MinWidth="20" MaxLength="1"
+                         HorizontalContentAlignment="Center"
+                         Margin="15 0" VerticalAlignment="Top"
+                         Text="{Binding PlayerInput, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="Submit" VerticalAlignment="Top" Width="75"
+                        Command="{Binding SubmitLetter}"/>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="25">
+                    <local:SecretWordView HorizontalAlignment="Left" Margin="0 0 0 10" Height="62" Width="300"/>
+                    <Button Content="End game" HorizontalAlignment="Left" 
+                            Command="{Binding BackCommand}" Width="150"/>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>
