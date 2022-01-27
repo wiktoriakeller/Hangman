@@ -8,3 +8,13 @@ cmake CMakeLists.txt
 make
 ./server
 ```
+
+Tu run the client application use following commands:
+```
+cd HangmanClient\
+dotnet publish -c Release --output .\MyTargetFolder HangmanClient.sln
+cd \MyTargerFolder
+start HangmanClient (or double click on HangmanClient.exe)
+```
+
+You can change settings of the client in ``HangmanClient.dll.config``.
