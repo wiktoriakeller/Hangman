@@ -192,6 +192,9 @@ void Player::PrepereToSend(std::string message) {
 }
 
 ParseMessegeStatus Player::ParseMessage(std::string message) {
+	if (message[0] == '\n')
+		return ParseMessegeStatus::NoMsgError;
+
 	std::vector<std::string> divided;
 	std::string messagePart;
 
@@ -243,14 +246,15 @@ ParseMessegeStatus Player::SendNewRoomId(const std::vector<std::string>& divided
 		toSend += (uint8_t)OperationCodes::RoomCreationFailed;
 	}
 	else {
-		SetName(name);
-		SetRoomId(generatedRoomId);
 		Game::Instance().AddRoom(generatedRoomId, _epollFd);
 		std::shared_ptr<Room> room = Game::Instance().GetRoom(generatedRoomId);
 		room->AddPlayer(Game::Instance().GetPlayer(_id), name);
+		
 		_currentWord = room->GetHiddenSecretWord();
-		_points = 0;
-		_hangmanState = 0;
+		SetName(name);
+		SetRoomId(generatedRoomId);
+		SetPoints(0);
+		SetHangmanState(0);
 
 		toSend += (uint8_t)OperationCodes::SendNewRoomId;
 		toSend += " ";
@@ -293,11 +297,11 @@ ParseMessegeStatus Player::JoinRoom(const std::vector<std::string>& divided) {
 		return error;
 	}
 
+	_currentWord = room->GetHiddenSecretWord();
 	SetName(name);
 	SetRoomId(roomId);
-	_points = 0;
-	_hangmanState = 0;
-	_currentWord = room->GetHiddenSecretWord();
+	SetPoints(0);
+	SetHangmanState(0);
 
 	room->AddPlayer(Game::Instance().GetPlayer(_id), name);
 	toSend += (uint8_t)OperationCodes::JoinRoom;

@@ -1,6 +1,7 @@
 #include "Room.h"
 #include "Game.h"
 #include <chrono>
+#include <algorithm>
 
 Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) { 
 	_secretWord = Game::Instance().GetRandomWord();
@@ -8,6 +9,7 @@ Room::Room(int id, int epollFd) : _roomId(id), _epollFd(epollFd) {
 	_timerCreated = false;
 	_gameStarted = false;
 	_gameTime = Game::Instance().GetGameTime();
+	printf("%s\n", _secretWord.c_str());
 }
 
 void Room::Close() {
@@ -230,8 +232,14 @@ void Room::SendWinner() {
 	}
 
 	message += " ";
-	message += _secretWord;
+	message += GetSecretWord();
 	SendToAll(message);
+}
+
+std::string Room::GetSecretWord() {
+	std::string withoutSpaces = _secretWord;
+	std::replace(withoutSpaces.begin(), withoutSpaces.end(), ' ', '_');
+	return withoutSpaces;
 }
 
 bool Room::WinnerFound() {
