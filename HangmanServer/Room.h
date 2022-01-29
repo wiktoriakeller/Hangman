@@ -28,6 +28,7 @@ public:
 	std::string GetWinnerPlayer();
 	void ClearRoom();
 	void SendWinner();
+	std::string GetSecretWord();
 	bool WinnerFound();
 	int PlayersLeftWithoutHangman();
 
