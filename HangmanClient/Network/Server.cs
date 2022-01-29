@@ -168,7 +168,7 @@ namespace HangmanClient.Network
                             HandleIncorrectLetter(split);
                             break;
                         case OperationCodes.CorrectLetter:
-                            HandleNewWord(split[1]);
+                            HandleNewWord("Word: " + split[1]);
                             break;
                         case OperationCodes.SendHangmanWithName:
                             HandleHangmanUpdate(split);
@@ -202,7 +202,7 @@ namespace HangmanClient.Network
         {
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameStarted = false));
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameOver = true));
-            _game.SecretWord = $"Game Over, it is a draw!\nSecret word was: {split[1]}";
+            _game.SecretWord = $"Game Over, it is a draw!\nSecret word was: {split[1].Replace("_", " ")}";
         }
 
         private void HandlePlayerLeft(string[] split)
@@ -217,13 +217,13 @@ namespace HangmanClient.Network
         {
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameStarted = false));
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _game.GameOver = true));
-            _game.SecretWord = $"Game Over, {split[1]} is the winner!\nSecret word was: {split[2]}";
+            _game.SecretWord = $"Game Over, {split[1]} is the winner!\nSecret word was: {split[2].Replace("_", " ")}";
         }
 
         private void HandleStartGame(string[] split)
         {
             _game.GameStarted = true;
-            _game.SecretWord = split[1];
+            _game.SecretWord = "Word: " + split[1];
         }
 
         private void HandleHangmanUpdate(string[] split)
