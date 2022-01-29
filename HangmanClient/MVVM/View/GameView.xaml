@@ -16,7 +16,7 @@
             <local:RoomNumberView DockPanel.Dock="Top" FontSize="28" 
                                   Height="42" Width="350" 
                                   HorizontalAlignment="Left" Margin="0 0 0 15"/>
-            <local:PlayerGallery  DockPanel.Dock="Bottom" MinHeight="150" Margin="5"/>
+            <local:PlayerGallery  DockPanel.Dock="Bottom" MinHeight="150"/>
             <local:MainPlayerView  DockPanel.Dock="Right" MinWidth="50" MinHeight="150" Margin="0 0 240 0"/>
             <StackPanel Orientation="Horizontal" Grid.Row="1">
                 <TextBlock Text="Select a letter: " VerticalAlignment="Top" Margin="1 0 0 0" FontSize="18"/>

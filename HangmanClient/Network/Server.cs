@@ -186,7 +186,7 @@ namespace HangmanClient.Network
                             HandlePlayerLeft(split);
                             break;
                         case OperationCodes.TimerStopped:
-                            HandleNewWord("Waiting for players");
+                            HandleNewWord("Waiting for players...");
                             break;
                         case OperationCodes.Draw:
                             HandleDraw(split);
@@ -278,6 +278,7 @@ namespace HangmanClient.Network
         {
             var roomId = int.Parse(split[1]);
             _game.RoomId = roomId;
+            _game.SecretWord = "Waiting for players...";
             _waitHandle.Set();
         }
     }
