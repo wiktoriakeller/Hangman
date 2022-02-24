@@ -1,5 +1,5 @@
 # Multiplayer hangman game
-Desktop application in which players guess the letters of the sacred word shared by all participants in a given room. Every player has their own hangman and players in the same room can see other participants hangmen. Player gets a point for a correct guessed letter. There can be multiple games in different rooms at the same time, but in one room can be only up to six players.
+Desktop application in which players guess the letters of the secret word shared by all participants in a given room. Every player has their own hangman and players in the same room can see other participants hangmen. Player gets a point for a correct guessed letter. There can be multiple games in different rooms at the same time, but in one room can be only up to six players.
 
 ## Technologies
 * C++
