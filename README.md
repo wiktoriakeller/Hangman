@@ -25,3 +25,8 @@ start HangmanClient (or double click on HangmanClient.exe)
 ```
 
 You can change settings of the client in ``HangmanClient.dll.config``.
+
+## Screenshots
+![image](https://user-images.githubusercontent.com/56191063/155878977-9ed73ccb-83ce-4f28-8b36-ca7980d6b06a.png)
+
+![image](https://user-images.githubusercontent.com/56191063/155879067-1487e72c-4be1-47b3-be96-6d461bdad6e1.png)
